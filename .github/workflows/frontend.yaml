@@ -1,0 +1,31 @@
+name: Frontend CI/CD (Bun)
+
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install Dependencies
+        run: cd frontend && bun install
+
+      - name: Run Unit Tests
+        run: cd frontend && bun run test
+
+      - name: Build Frontend
+        run: cd frontend && bun run build
+
+      - name: Docker Build Frontend
+        run: docker build -t twitter-frontend ./frontend

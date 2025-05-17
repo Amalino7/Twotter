@@ -1,0 +1,9 @@
+FROM oven/bun:1
+
+WORKDIR /app
+
+COPY frontend .
+
+RUN bun install && bun run build
+
+CMD ["bun", "start"]
