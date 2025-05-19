@@ -1,8 +1,9 @@
+# frontend/Dockerfile
 FROM oven/bun:1
 
 WORKDIR /app
 
-COPY frontend .
+COPY . .
 
 RUN bun install && bun run build
 

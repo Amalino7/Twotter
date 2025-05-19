@@ -28,4 +28,4 @@ jobs:
         run: cd frontend && bun run build
 
       - name: Docker Build Frontend
-        run: docker build -t twitter-frontend dockerfile
+        run: docker build -t twitter-frontend ./frontend
