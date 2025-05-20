@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { text } from 'stream/consumers'
 import Post from '../components/Post.vue'
 
 const posts = [
-  { text: 'hksfdgfgdhsfjdg', user: 'trash' },
+  { text: 'hksfdgfgdhsfjdg', user: 'trash', url: 'https://picsum.photos/2000/1000' },
   { text: 'shgksdkg', user: 'meaningful' },
   { text: 'sfhfkg', user: 'random' },
   {
@@ -26,6 +25,8 @@ console.log(randomDate(new Date(2012, 0, 1), new Date()))
       :username="post.user"
       :user-handle="'@' + post.user"
       :timestamp="randomDate(new Date(2012, 0, 1), new Date())"
+      :image-url="post.url"
+      url="https://www.youtube.com/"
     >
     </Post>
   </main>

@@ -1,12 +1,12 @@
 <template>
-  <nav class="flex flex-col flex-1 left" v-if="!isMobile">
+  <nav class="flex flex-col flex-1 left text-xl" v-if="!isMobile">
     <router-link key="/home" to="/home" class="">🏠 Home</router-link>
     <router-link key="/new" to="/new" class="">➕ Post</router-link>
     <router-link key="/user" :to="`/user/${username}`" class="">👤 Profile</router-link>
     <!-- <div class="h-4"></div> -->
     <hr class="divide-solid rounded-3xl border-b-4 w-1/3 ml-4 mt-2" />
   </nav>
-  <nav class="flex flex-row justify-around" v-if="isMobile">
+  <nav class="flex flex-row justify-around text-3xl" v-if="isMobile">
     <router-link to="/home" class="flex-1 text-center">🏠 Home</router-link>
     <router-link to="/new" class="flex-1 text-center">➕ Post</router-link>
     <router-link :to="`/user/${username}`" class="flex-1 text-center">👤 Profile</router-link>
@@ -24,12 +24,11 @@ const props = defineProps({
 </script>
 
 <style scoped>
-nav {
-  /* width: 100%; */
-  font-size: 18px;
-  /* text-align: center; */
-  /* margin-top: 2rem; */
-}
+/* nav {
+  /* width: 100%;/ */
+/* text-align: center; */
+/* margin-top: 2rem; 
+} */
 
 nav a.router-link-exact-active {
   color: var(--color-text);
