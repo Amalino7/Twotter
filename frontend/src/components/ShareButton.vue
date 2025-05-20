@@ -54,11 +54,6 @@ const notification = ref({ show: false, message: '' })
 function showNotification(message: string) {
   notification.value.message = message
   notification.value.show = true
-  const progressBar = document.querySelector('.notification-progress') as HTMLElement | null
-  if (progressBar) {
-    progressBar.style.width = '100%'
-  }
-
   setTimeout(() => {
     notification.value.show = false
   }, 3000)
