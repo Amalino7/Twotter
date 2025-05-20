@@ -12,13 +12,13 @@ const isMobile = computed(() => width.value < 768)
     <DesktopLayout v-else /> -->
   <div class="flex flex-row h-screen v-screen" v-if="!isMobile">
     <Navigation :is-mobile="isMobile"></Navigation>
-    <div class="flex-3 bg-green-600">
+    <div class="flex-3 bg-green-600 overflow-auto max-w-3xl">
       <RouterView></RouterView>
     </div>
     <div class="flex-1 bg-cyan-500"></div>
   </div>
   <div class="h-screen v-screen flex flex-col" v-else="isMobile">
-    <div class="flex-1 bg-cyan-500">
+    <div class="flex-1 bg-cyan-500 overflow-auto">
       <RouterView></RouterView>
     </div>
     <Navigation :is-mobile="isMobile"></Navigation>
