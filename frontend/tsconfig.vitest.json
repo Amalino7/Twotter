@@ -1,14 +1,12 @@
 {
-  "extends": "./tsconfig.app.json",
-  "include": [
-    "src/**/__tests__/*",
-    "env.d.ts",
-    "src/**/*.vue" 
-  ],
-  "exclude": [],
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
-    "lib": [],
-    "types": ["node", "jsdom", "vue"]
-  }
+    "types": ["vitest/globals"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ]
 }
