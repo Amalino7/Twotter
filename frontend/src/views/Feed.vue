@@ -3,8 +3,8 @@ import Post from '../components/Post.vue'
 
 const posts = [
   { text: 'hksfdgfgdhsfjdg', user: 'trash', url: 'https://picsum.photos/2000/1000' },
-  { text: 'shgksdkg', user: 'meaningful' },
-  { text: 'sfhfkg', user: 'random' },
+  { text: 'shgksdkg', user: 'meaningful', url: 'https://picsum.photos/3000/1000' },
+  { text: 'sfhfkg', user: 'random', url: 'https://picsum.photos/1000/2000' },
   {
     text: 'gifghksdfgfdsfskhgfgsdkgdsfghdksfgkdfsgdfksdsgghdksghdskdsfdsgfsddksghkdsj',
     user: 'fdsfgjhsfdgjshgfdksdfhsfkhsfsdhshfjkgjsfdgkhfgskda',

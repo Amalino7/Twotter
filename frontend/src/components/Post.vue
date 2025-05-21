@@ -5,6 +5,7 @@ import CommentIcon from './icons/CommentIcon.vue'
 import convertToTwitterDate from '../utility/twitterDate'
 import { ref } from 'vue'
 import SocialButton from './SocialButton.vue'
+import BetterImage from '@/components/BetterImage.vue'
 
 const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url'])
 
@@ -31,11 +32,7 @@ const twitterDate = convertToTwitterDate(props.timestamp)
       <div class="mt-4">
         <p class="text-gray-300 break-words">{{ text }}</p>
         <div v-if="imageUrl" class="mt-4">
-          <img
-            :src="imageUrl"
-            alt="Tweet Image"
-            class="w-full h-auto max-h-96 object-contain rounded-lg"
-          />
+          <BetterImage :image-url="imageUrl"/>
         </div>
       </div>
       <div class="mt-4 flex justify-between">
