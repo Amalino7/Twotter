@@ -48,7 +48,7 @@ import ShareIcon from './icons/ShareIcon.vue'
 import Notification from './Notification.vue'
 
 const showModal = ref(false)
-const { url } = defineProps({ url: String })
+const { url } = defineProps({ url: {type: String, required: true} ,})
 const notification = ref({ show: false, message: '' })
 
 function showNotification(message: string) {

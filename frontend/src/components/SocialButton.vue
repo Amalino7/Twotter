@@ -6,7 +6,7 @@ const isHearted = ref(false)
 const isAnimating = ref(false)
 const justUnhearted = ref(false)
 
-const count = defineModel<number>()
+const count = defineModel<number>({required:true})
 
 function HeartButton() {
   if (isHearted.value) {
@@ -55,17 +55,5 @@ function HeartButton() {
   100% {
     transform: scale(1);
   }
-}
-
-.animate-pop {
-  animation: pop 0.3s ease-out;
-}
-
-.notification-progress {
-  width: 100%;
-}
-
-.notification-show .notification-progress {
-  width: 0%;
 }
 </style>
