@@ -53,10 +53,6 @@ const notification = ref({ show: false, message: '' })
 
 function showNotification(message: string) {
   notification.value.message = message
-  notification.value.show = true
-  setTimeout(() => {
-    notification.value.show = false
-  }, 3000)
 }
 
 async function copyLink() {

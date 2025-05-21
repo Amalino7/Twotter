@@ -1,8 +1,5 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts" setup>
 import LayoutWrapper from './views/LayoutWrapper.vue'
-import Navigation from './components/Navigation.vue'
 </script>
 
 <template>

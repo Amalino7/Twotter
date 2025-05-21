@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from 'vue'
 import LikeIcon from './icons/LikeIcon.vue'
-import { onMounted } from 'vue'
+
 const isHearted = ref(false)
 const isAnimating = ref(false)
 const justUnhearted = ref(false)
@@ -26,7 +26,6 @@ function HeartButton() {
 
 <template>
   <button
-    @click="HeartButton"
     :class="[
       'flex items-center transition-all duration-200',
       isHearted
@@ -35,6 +34,7 @@ function HeartButton() {
           ? 'text-gray-400'
           : 'text-gray-400 hover:text-pink-400',
     ]"
+    @click="HeartButton"
   >
     <LikeIcon
       :class="['transition-transform duration-300 ease-out', isAnimating ? 'animate-pop' : '']"
