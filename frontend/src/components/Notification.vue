@@ -39,6 +39,7 @@ watch(
       // Set new timeout
       timeoutId = setTimeout(() => {
         props.notification.show = false
+        props.notification.message=''
         timeoutId = null
       }, duration)
     }

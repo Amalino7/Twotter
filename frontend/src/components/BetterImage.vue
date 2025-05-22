@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, type ReservedProps } from 'vue'
+import { computed, onMounted, ref } from 'vue'
   const props = defineProps({imageUrl:{type:String,required: true} })
   const imageDimensions = ref<{ width: number; height: number }>({width: 0, height:0})
   const imageLoaded = ref(false);
@@ -11,7 +11,6 @@ const placeholderStyle = computed(() => {
   const { width, height } = imageDimensions.value;
 
   if (width && height) {
-    const aspectRatio = width / height;
     return {
       aspectRatio: `${width} / ${height}`, // sets correct ratio
       width: '100%',
@@ -46,16 +45,20 @@ function  getImageDimensions() {
 
 <template>
   <div>
-    <div v-if="!imageLoaded" :style="placeholderStyle">
+    <div v-if="!imageLoaded" :style="placeholderStyle" class="text-gray-900">
       <p>Loading image...</p>
     </div>
-    <img
-      v-show="imageLoaded"
-      :src="imageUrl"
-      alt="Tweet Image"
-      class="w-full h-auto max-h-96 object-contain rounded-lg"
-      @load="onImageLoad"
-    />
+    <div class="rounded-lg overflow-clip relative shadow-sm shadow-gray-800"
+    style="">
+      <img :src="imageUrl" alt="background tweet" class="absolute w-full h-auto max-h-96 object-cover blur-xl sepia-30" />
+      <img
+        v-show="imageLoaded"
+        :src="imageUrl"
+        alt="Tweet Image"
+        class="w-full h-auto max-h-96 object-contain relative rounded-lg"
+        @load="onImageLoad"
+      />
+    </div>
 
   </div>
 </template>

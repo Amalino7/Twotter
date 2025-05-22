@@ -6,7 +6,7 @@
 
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-gray-600/40 backdrop-blur-sm flex justify-center items-center"
+      class="fixed inset-0 bg-gray-600/40 backdrop-blur-sm flex justify-center items-center z-10"
     >
       <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
         <p class="text-white mb-4">Share this link:</p>
@@ -37,8 +37,8 @@
           </button>
         </div>
       </div>
+      <Notification :notification="notification" />
     </div>
-    <Notification :notification="notification" />
   </div>
 </template>
 

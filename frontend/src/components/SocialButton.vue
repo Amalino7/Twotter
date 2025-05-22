@@ -56,4 +56,8 @@ function HeartButton() {
     transform: scale(1);
   }
 }
+
+.animate-pop {
+  animation: pop 0.3s ease-out;
+}
 </style>
