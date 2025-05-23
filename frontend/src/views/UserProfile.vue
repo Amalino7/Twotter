@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center space-x-4">
           <img
-            src="https://via.placeholder.com/80"
+            src="https://placehold.co/80"
             alt="User avatar"
             class="w-20 h-20 rounded-full border-2 border-gray-700"
           />
@@ -113,21 +113,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Feed from '@/views/Feed.vue'
+import { ref } from 'vue';
+import Feed from '@/views/Feed.vue';
 
-const isOwnProfile = ref(false)
-const isFollowing = ref(false)
-const isEditing = ref(false)
+const isOwnProfile = ref(true);
+const isFollowing = ref(false);
+const isEditing = ref(false);
 
-const username = ref('username')
-const fullName = ref('Full Name')
-const bio = ref('This is a sample user bio. It can include interests, occupation, and more.')
+const username = ref('username');
+const fullName = ref('Full Name');
+const bio = ref('This is a sample user bio. It can include interests, occupation, and more.');
 
-const editableUsername = ref(username.value)
-const editableFullName = ref(fullName.value)
-const editableBio = ref(bio.value)
-const editStatus = ref('')
+const editableUsername = ref(username.value);
+const editableFullName = ref(fullName.value);
+const editableBio = ref(bio.value);
+const editStatus = ref('');
 
 // const tweets = [
 //   {
@@ -143,39 +143,39 @@ const editStatus = ref('')
 // ];
 
 const toggleFollow = () => {
-  isFollowing.value = !isFollowing.value
-}
+  isFollowing.value = !isFollowing.value;
+};
 
 const simulateSaveRequest = () => {
   return new Promise((resolve, reject) => {
-    const success = Math.random() > 0.2
-    setTimeout(() => (success ? resolve() : reject()), 800)
-  })
-}
+    const success = Math.random() > 0.2;
+    setTimeout(() => (success ? resolve() : reject()), 800);
+  });
+};
 
 const saveProfile = async () => {
   try {
-    await simulateSaveRequest()
-    username.value = editableUsername.value
-    fullName.value = editableFullName.value
-    bio.value = editableBio.value
-    isEditing.value = false
-    editStatus.value = 'Saved successfully'
+    await simulateSaveRequest();
+    username.value = editableUsername.value;
+    fullName.value = editableFullName.value;
+    bio.value = editableBio.value;
+    isEditing.value = false;
+    editStatus.value = 'Saved successfully';
   } catch {
-    editStatus.value = 'Save failed'
+    editStatus.value = 'Save failed';
   } finally {
-    setTimeout(() => (editStatus.value = ''), 1500)
+    setTimeout(() => (editStatus.value = ''), 1500);
   }
-}
+};
 
 const cancelEdit = () => {
-  editableUsername.value = username.value
-  editableFullName.value = fullName.value
-  editableBio.value = bio.value
-  isEditing.value = false
-  editStatus.value = 'Edit canceled'
-  setTimeout(() => (editStatus.value = ''), 1500)
-}
+  editableUsername.value = username.value;
+  editableFullName.value = fullName.value;
+  editableBio.value = bio.value;
+  isEditing.value = false;
+  editStatus.value = 'Edit canceled';
+  setTimeout(() => (editStatus.value = ''), 1500);
+};
 </script>
 
 <style scoped>

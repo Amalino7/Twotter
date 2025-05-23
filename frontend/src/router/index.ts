@@ -1,6 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import TheWelcome from '@/components/TheWelcome.vue'
-import Feed from '@/views/Feed.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Feed from '@/views/Feed.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,9 +20,9 @@ const router = createRouter({
     {
       path: '/new',
       name: 'post',
-      component: TheWelcome,
+      component: () => import('../views/NewPost.vue'),
     },
   ],
-})
+});
 
-export default router
+export default router;
