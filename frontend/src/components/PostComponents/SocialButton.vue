@@ -1,26 +1,26 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import LikeIcon from './icons/LikeIcon.vue'
+import { ref } from 'vue';
+import LikeIcon from '../icons/LikeIcon.vue';
 
-const isHearted = ref(false)
-const isAnimating = ref(false)
-const justUnhearted = ref(false)
+const isHearted = ref(false);
+const isAnimating = ref(false);
+const justUnhearted = ref(false);
 
-const count = defineModel<number>({required:true})
+const count = defineModel<number>({ required: true });
 
 function HeartButton() {
   if (isHearted.value) {
-    isHearted.value = false
-    count.value--
-    justUnhearted.value = true
+    isHearted.value = false;
+    count.value--;
+    justUnhearted.value = true;
     setTimeout(() => {
-      justUnhearted.value = false
-    }, 1000)
+      justUnhearted.value = false;
+    }, 1000);
   } else {
-    isHearted.value = true
-    count.value++
+    isHearted.value = true;
+    count.value++;
   }
-  isAnimating.value = true
+  isAnimating.value = true;
 }
 </script>
 
