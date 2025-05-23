@@ -3,13 +3,30 @@
     <div class="max-w-2xl mx-auto">
       <h2 class="text-2xl font-bold mb-4">What's happening?</h2>
 
-      <textarea
-        v-model="newTwott"
-        class="w-full h-32 bg-gray-800 text-white p-3 rounded-lg resize-none border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-        placeholder="Write your twott..."
-        @input="updateCharCount"
-      ></textarea>
-
+      <div class="relative">
+        <textarea
+          v-model="newTwott"
+          class="w-full h-48 bg-gray-800 text-white p-3 rounded-lg resize-none border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          placeholder="Write your twott..."
+          @input="updateCharCount"
+        ></textarea>
+        <button
+          @click="showEmojiPicker = !showEmojiPicker"
+          class="absolute right-3 bottom-3 text-xl hover:scale-110 transition-transform"
+        >
+          😃
+        </button>
+        <div v-if="showEmojiPicker" class="absolute -bottom-50 right-16 z-10">
+          <Picker
+            @select="showEmoji"
+            set="twitter"
+            :data="emojiIndex"
+            theme="dark"
+            :emoji-size="18"
+            :show-preview="false"
+          />
+        </div>
+      </div>
       <!-- Media upload -->
       <div class="mt-4">
         <label class="block mb-1 text-sm font-semibold">Add media</label>
@@ -72,13 +89,23 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import data from 'emoji-mart-vue-fast/data/twitter.json';
+import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
+import 'emoji-mart-vue-fast/css/emoji-mart.css';
 
+const emojiIndex = new EmojiIndex(data);
 const newTwott = ref('');
 const postStatus = ref('');
 const charCount = ref(0);
 const mediaFiles = ref([]);
 const mediaPreviews = ref([]);
 const mediaInput = ref(null);
+const showEmojiPicker = ref(false);
+
+const showEmoji = (emoji) => {
+  newTwott.value += emoji.native;
+  showEmojiPicker.value = false;
+};
 
 const updateCharCount = () => {
   charCount.value = newTwott.value.length;
