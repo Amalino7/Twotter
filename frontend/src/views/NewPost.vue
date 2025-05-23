@@ -102,13 +102,14 @@ const mediaPreviews = ref([]);
 const mediaInput = ref(null);
 const showEmojiPicker = ref(false);
 
-const showEmoji = (emoji) => {
-  newTwott.value += emoji.native;
-  showEmojiPicker.value = false;
-};
-
 const updateCharCount = () => {
   charCount.value = newTwott.value.length;
+};
+
+const showEmoji = (emoji) => {
+  newTwott.value += emoji.native;
+  updateCharCount();
+  showEmojiPicker.value = false;
 };
 
 const charCountColor = computed(() => {

@@ -1,17 +1,18 @@
 <script setup>
-import ShareButton from './ShareButton.vue'
-import RetweetIcon from './icons/RetweetIcon.vue'
-import CommentIcon from './icons/CommentIcon.vue'
-import convertToTwitterDate from '../utility/twitterDate'
-import { ref } from 'vue'
-import SocialButton from './SocialButton.vue'
-import BetterImage from '@/components/BetterImage.vue'
+import ShareButton from './ShareButton.vue';
+import RetweetIcon from '../icons/RetweetIcon.vue';
+import CommentIcon from '../icons/CommentIcon.vue';
+import convertToTwitterDate from '../../utility/twitterDate.js';
+import { ref } from 'vue';
+import SocialButton from './SocialButton.vue';
+import BetterImage from '@/components/BetterImage.vue';
+import TextFormat from '@/components/Utility/TextFormat.vue';
 
-const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url'])
+const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url']);
 
-const likeCount = ref(0)
+const likeCount = ref(0);
 
-const twitterDate = convertToTwitterDate(props.timestamp)
+const twitterDate = convertToTwitterDate(props.timestamp);
 </script>
 
 <template>
@@ -30,7 +31,11 @@ const twitterDate = convertToTwitterDate(props.timestamp)
         </div>
       </div>
       <div class="mt-4">
-        <p class="text-gray-300 break-words">{{ text }}</p>
+        <!--        <TextFormat :content="`<script>alert('You got pwned')</script> Sbeve I am #cool`"></TextFormat>-->
+        <!--        <TextFormat :text=" ` <p> <p/> Check out this website: www.example.com and also this one: https://www.another-example.com`"  />-->
+        <p class="text-gray-300 break-words">
+          <TextFormat :text="text"></TextFormat>
+        </p>
         <div v-if="imageUrl" class="mt-4">
           <BetterImage :image-url="imageUrl" />
         </div>
