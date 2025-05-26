@@ -1,0 +1,31 @@
+{
+  "auth": {
+    "POST /auth/register": "Register a new user (more focused on self-service, includes password/email validation)",
+    "POST /auth/login": "Authenticate a user and return a JWT",
+    "POST /auth/logout": "Invalidate the JWT (if applicable)"
+  },
+  "users": {
+    "GET /users": "List all users",
+    "POST /users": "Create a new user (admin or internal use, differs from /auth/register by context)",
+    "GET /users/{id}": "Get user by ID",
+    "PUT /users/{id}": "Update user by ID",
+    "DELETE /users/{id}": "Delete user by ID"
+  },
+  "posts": {
+    "GET /posts": "Get all posts",
+    "POST /posts": "Create a new post",
+    "GET /posts/{id}": "Get post by ID",
+    "PUT /posts/{id}": "Update post by ID",
+    "DELETE /posts/{id}": "Delete post by ID"
+  },
+  "followers": {
+    "POST /users/{id}/followers": "Authenticated user follows user {id}",
+    "DELETE /users/{id}/followers": "Authenticated user unfollows user {id}",
+    "GET /users/{id}/followers": "List followers of a user",
+    "GET /users/{id}/following": "List users that a user is following"
+  },
+  "feeds": {
+    "GET /users/{id}/posts": "Get all posts by a specific user",
+    "GET /users/{id}/feed": "Get the feed for user {id} (authenticated or admin access only)"
+  }
+}
