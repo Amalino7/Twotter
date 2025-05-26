@@ -38,6 +38,7 @@ jobs:
 
       - name: Build and Test Backend
         run: ./gradlew build test
+        working-directory: backend
 
       - name: Docker Build Backend
         run: docker build -t twitter-backend ./backend
