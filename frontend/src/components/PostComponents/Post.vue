@@ -2,7 +2,7 @@
 import ShareButton from './ShareButton.vue';
 import RetweetIcon from '../icons/RetweetIcon.vue';
 import CommentIcon from '../icons/CommentIcon.vue';
-import convertToTwitterDate from '../../utility/twitterDate.js';
+import convertToTwitterDate from '@/utils/twitterDate.js';
 import { ref } from 'vue';
 import SocialButton from './SocialButton.vue';
 import BetterImage from '@/components/BetterImage.vue';
