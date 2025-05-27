@@ -5,6 +5,9 @@ const ui = useUIStore();
 
 async function copyLink() {
   try {
+    if (!ui.modalProps.url) {
+      throw new Error('URL is not available');
+    }
     await navigator.clipboard.writeText(ui.modalProps.url);
     ui.triggerToast('Copied successfully!');
   } catch {
@@ -15,6 +18,9 @@ async function copyLink() {
 async function shareIfSupported() {
   if (navigator.share) {
     try {
+      if (!ui.modalProps.url) {
+        throw new Error('URL is not available');
+      }
       await navigator.share({
         title: document.title,
         url: ui.modalProps.url,
