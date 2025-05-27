@@ -1,9 +1,13 @@
 <script lang="ts" setup>
-import LayoutWrapper from './views/LayoutWrapper.vue'
+import LayoutWrapper from './views/LayoutWrapper.vue';
+import Toaster from '@/components/Utility/Toaster.vue';
+import ModalWrapper from '@/views/ModalWrapper.vue';
 </script>
 
 <template>
   <LayoutWrapper></LayoutWrapper>
+  <Toaster />
+  <ModalWrapper />
   <!-- <header>
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 

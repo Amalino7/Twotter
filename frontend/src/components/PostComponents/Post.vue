@@ -1,22 +1,23 @@
 <script setup>
-import ShareButton from './ShareButton.vue'
-import RetweetIcon from './icons/RetweetIcon.vue'
-import CommentIcon from './icons/CommentIcon.vue'
-import convertToTwitterDate from '../utility/twitterDate'
-import { ref } from 'vue'
-import SocialButton from './SocialButton.vue'
-import BetterImage from '@/components/BetterImage.vue'
+import ShareButton from './ShareButton.vue';
+import RetweetIcon from '../icons/RetweetIcon.vue';
+import CommentIcon from '../icons/CommentIcon.vue';
+import convertToTwitterDate from '@/utils/twitterDate.js';
+import { ref } from 'vue';
+import SocialButton from './SocialButton.vue';
+import BetterImage from '@/components/BetterImage.vue';
+import TextFormat from '@/components/Utility/TextFormat.vue';
 
-const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url'])
+const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url']);
 
-const likeCount = ref(0)
+const likeCount = ref(0);
 
-const twitterDate = convertToTwitterDate(props.timestamp)
+const twitterDate = convertToTwitterDate(props.timestamp);
 </script>
 
 <template>
   <div
-    class="w-full max-w-xl bg-gray-700 rounded-xl shadow-md overflow-hidden m-4 text-white border border-gray-600"
+    class="w-full max-w-2xl bg-gray-700 rounded-xl shadow-md overflow-hidden m-4 text-white border border-gray-600"
   >
     <div class="p-4">
       <div class="flex items-center">
@@ -30,9 +31,13 @@ const twitterDate = convertToTwitterDate(props.timestamp)
         </div>
       </div>
       <div class="mt-4">
-        <p class="text-gray-300 break-words">{{ text }}</p>
+        <!--        <TextFormat :content="`<script>alert('You got pwned')</script> Sbeve I am #cool`"></TextFormat>-->
+        <!--        <TextFormat :text=" ` <p> <p/> Check out this website: www.example.com and also this one: https://www.another-example.com`"  />-->
+        <p class="text-gray-300 break-words">
+          <TextFormat :text="text"></TextFormat>
+        </p>
         <div v-if="imageUrl" class="mt-4">
-          <BetterImage :image-url="imageUrl"/>
+          <BetterImage :image-url="imageUrl" />
         </div>
       </div>
       <div class="mt-4 flex justify-between">
