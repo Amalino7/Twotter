@@ -1,5 +1,6 @@
 package com.example
 
+import connectToDatabase
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -7,6 +8,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    connectToDatabase()
     configureHTTP()
     configureSecurity()
     configureSerialization()
