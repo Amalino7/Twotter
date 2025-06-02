@@ -15,28 +15,29 @@ class PostRepositoryImpl : PostRepository {
     override suspend fun addPost(item: Post): Post {
         return transaction {
             Posts.insertReturning {
-                it[id] = UUID.randomUUID()
+                it[id] = item.id
                 it[content] = item.content
-                it[user] = UUID.fromString(item.userID)
+                it[imageUrl] = item.imageUrl
+                it[user] = item.userId
             }.single().toPost()
         }
     }
 
 
-    override suspend fun getPostById(id: String): Post? {
-        return transaction { Posts.selectAll().where { Posts.id eq UUID.fromString(id) }.singleOrNull()?.toPost() }
+    override suspend fun getPostById(id: UUID): Post? {
+        return transaction { Posts.selectAll().where { Posts.id eq id }.singleOrNull()?.toPost() }
     }
 
-    override suspend fun updatePost(id: String, item: Post): Boolean {
+    override suspend fun updatePost(id: UUID, item: Post): Boolean {
         return transaction {
-            Posts.update({ Posts.id eq UUID.fromString(id) }) {
+            Posts.update({ Posts.id eq id }) {
                 it[content] = item.content
             } > 0
         }
     }
 
-    override suspend fun deletePostById(id: String): Boolean {
-        return transaction { Posts.deleteWhere { Posts.id eq UUID.fromString(id) } > 0 }
+    override suspend fun deletePostById(id: UUID): Boolean {
+        return transaction { Posts.deleteWhere { Posts.id eq id } > 0 }
     }
 
     override suspend fun getAllPosts(): List<Post> {

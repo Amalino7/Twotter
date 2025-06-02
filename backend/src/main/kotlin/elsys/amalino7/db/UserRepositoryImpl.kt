@@ -10,14 +10,13 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import java.util.*
-import java.util.UUID.randomUUID
 
 
 class UserRepositoryImpl : UserRepository {
 
-    override suspend fun getUserById(id: String): User? {
+    override suspend fun getUserById(id: UUID): User? {
         return transaction {
-            Users.selectAll().where { Users.id eq UUID.fromString(id) }
+            Users.selectAll().where { Users.id eq id }
                 .singleOrNull()?.toUser()
         }
     }
@@ -34,27 +33,30 @@ class UserRepositoryImpl : UserRepository {
     override suspend fun addUser(user: User): User {
         return transaction {
             Users.insertReturning {
-                it[id] = randomUUID()
+                it[id] = user.id
                 it[username] = user.name
                 it[email] = user.email
-                it[passwordHash] = user.password
+                it[bio] = user.bio
+                it[displayName] = user.displayName
+                it[keycloakId] = user.keycloakId
             }.single().toUser()
         }
     }
 
     override suspend fun updateUser(user: User): Boolean {
         return transaction {
-            Users.update({ Users.id eq UUID.fromString(user.id) }) {
+            Users.update({ Users.id eq user.id }) {
                 it[username] = user.name
                 it[email] = user.email
-                it[passwordHash] = user.password
+                it[bio] = user.bio
+                it[displayName] = user.displayName
             } > 0
         }
     }
 
-    override suspend fun deleteUserById(id: String): Boolean {
+    override suspend fun deleteUserById(id: UUID): Boolean {
         return transaction {
-            Users.deleteWhere { Users.id eq UUID.fromString(id) } > 0
+            Users.deleteWhere { Users.id eq id } > 0
         }
     }
 }

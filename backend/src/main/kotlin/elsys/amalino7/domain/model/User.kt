@@ -1,3 +1,15 @@
 package elsys.amalino7.domain.model
 
-data class User (val id: String, val name: String, val email: String, val password: String)
+import kotlinx.datetime.Instant
+import java.util.*
+
+data class User(
+    val id: UUID,
+    val keycloakId: String,
+    val name: String,
+    val email: String,
+    val bio: String? = null,
+    val displayName: String? = null,
+    val createdAt: Instant,
+    val updatedAt: Instant
+)

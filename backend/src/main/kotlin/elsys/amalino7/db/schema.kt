@@ -5,8 +5,8 @@ import org.jetbrains.exposed.v1.javatime.timestamp
 
 object Users : UUIDTable("users") {
     val username = text("username").uniqueIndex()
+    val keycloakId = text("keycloak_id").uniqueIndex()
     val email = text("email").uniqueIndex()
-    val passwordHash = text("password_hash")
     val displayName = text("display_name").nullable()
     val bio = text("bio").nullable()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
@@ -18,6 +18,7 @@ object Users : UUIDTable("users") {
 object Posts : UUIDTable("posts") {
     val user = reference("user_id", Users)
     val content = text("content")
+    val imageUrl = text("image_url").nullable()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
     val updatedAt = timestamp("updated_at")
 //        .withDefinition("UPDATE", CurrentTimestamp)

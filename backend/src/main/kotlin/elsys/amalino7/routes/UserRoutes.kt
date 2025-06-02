@@ -1,28 +1,37 @@
-import elsys.amalino7.db.UserRepositoryImpl
-import elsys.amalino7.domain.model.User
-import elsys.amalino7.dto.UserDTO
+import elsys.amalino7.domain.services.UserService
+import elsys.amalino7.dto.UserCreateRequest
+import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.userRoute() {
     get("/users") {
-        val users = UserRepositoryImpl().getAllUsers().map {
-            UserDTO(it.id,it.name, it.email)
-        }
+        val users = UserService().getAllUsers()
         call.respond(users)
     }
     get("/users/{id}") {
-        val user = UserRepositoryImpl().getUserById(call.parameters["id"]!!)
+        val userId = call.parameters["id"]!!
+        val user = UserService().getUserById(userId)
         if (user == null) {
-            call.respond(UserDTO("", "", ""))
+            call.respond(HttpStatusCode.NotFound)
             return@get
         }
-        call.respond(UserDTO(user.id, user.name, user.email))
+        call.respond(user)
     }
     post("/users") {
-        val user = call.receive<UserDTO>()
-        val res = UserRepositoryImpl().addUser(User(user.id, user.name, user.email, "123456"))
-        call.respond(UserDTO(res.id, res.name, res.email))
+        val userDto = call.receive<UserCreateRequest>()
+        val user = UserService().addUser(userDto)
+        call.respond(user)
+    }
+    delete("/users/{id}") {
+        val userId = call.parameters["id"]!!
+        val isDeleted = UserService().deleteUser(userId)
+        if (isDeleted) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respond(HttpStatusCode.NotFound)
+        }
+        
     }
 }
