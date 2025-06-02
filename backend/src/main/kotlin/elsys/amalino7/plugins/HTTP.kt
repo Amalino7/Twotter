@@ -1,4 +1,4 @@
-package com.example
+package elsys.amalino7.plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*

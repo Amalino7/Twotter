@@ -10,16 +10,19 @@ object Users : UUIDTable("users") {
     val displayName = text("display_name").nullable()
     val bio = text("bio").nullable()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
-    val updatedAt = timestamp("updated_at").defaultExpression(CurrentTimestamp)
-        .withDefinition("ON UPDATE", CurrentTimestamp)
+    val updatedAt = timestamp("updated_at")
+//        .withDefinition("UPDATE", CurrentTimestamp)
+        .defaultExpression(CurrentTimestamp)
 }
 
 object Posts : UUIDTable("posts") {
     val user = reference("user_id", Users)
     val content = text("content")
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
-    val updatedAt = timestamp("updated_at").defaultExpression(CurrentTimestamp)
-        .withDefinition("ON UPDATE", CurrentTimestamp)
+    val updatedAt = timestamp("updated_at")
+//        .withDefinition("UPDATE", CurrentTimestamp)
+        .defaultExpression(CurrentTimestamp)
+
 }
 
 object Follows : Table("follows") {

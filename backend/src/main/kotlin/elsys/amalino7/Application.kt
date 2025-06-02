@@ -1,6 +1,7 @@
-package com.example
+package elsys.amalino7
 
 import connectToDatabase
+import elsys.amalino7.plugins.*
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {

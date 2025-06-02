@@ -1,4 +1,4 @@
-package plugins//package com.example
+package elsys.amalino7.plugins//package com.example
 //
 //import io.github.flaxoos.ktor.server.plugins.ratelimiter.RateLimiting
 //import io.github.flaxoos.ktor.server.plugins.ratelimiter.implementations.TokenBucket

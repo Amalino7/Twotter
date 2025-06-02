@@ -1,6 +1,6 @@
-package com.example
+package elsys.amalino7.plugins
 
-import com.example.routes.postRoute
+import elsys.amalino7.routes.postRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*

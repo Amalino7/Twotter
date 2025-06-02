@@ -1,23 +1,136 @@
-openapi: "3.0.3"
+openapi: "3.1.0"
 info:
-  title: "Application API"
-  description: "Application API"
+  title: "backend API"
+  description: "backend API"
   version: "1.0.0"
 servers:
-  - url: "http://0.0.0.0:8080"
+  - url: "https://backend"
 paths:
-  /:
+  /posts:
     get:
-      description: "Hello World!"
+      description: ""
       responses:
         "200":
           description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostDTO"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostDTO"
+  /users:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserDTO"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+  /users/{id}:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+              examples:
+                Example#1:
+                  description: ""
+                  value:
+                    id: ""
+                    name: ""
+                    email: ""
+  /callback:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
           content:
             text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
-                  value: "Hello World!"
+                  value: "/hello"
+  /login:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "/callback"
 components:
-  schemas: { }
+  schemas:
+    PostDTO:
+      type: "object"
+      properties:
+        content:
+          type: "string"
+        userID:
+          type: "string"
+      required:
+        - "content"
+        - "userID"
+    UserDTO:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        email:
+          type: "string"
+      required:
+        - "id"
+        - "name"
+        - "email"

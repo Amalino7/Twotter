@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.migration.MigrationUtils
 
 fun Application.connectToDatabase() {
     val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:postgresql://localhost:5432/" + dotenv().get("POSTGRES_DB")
+        jdbcUrl = "jdbc:postgresql://localhost:${dotenv().get("POSTGRES_PORT")}/" + dotenv().get("POSTGRES_DB")
         driverClassName = "org.postgresql.Driver"
         username = dotenv().get("POSTGRES_USER")
         password = dotenv().get("POSTGRES_PASSWORD")
@@ -29,8 +29,8 @@ fun Application.connectToDatabase() {
         SchemaUtils.createSchema(schema)
         val res = MigrationUtils.statementsRequiredForDatabaseMigration(
             Users, Posts, Follows
-        );
+        )
         res.forEach(::exec)
-        println(res);
+        println(res)
     }
 }

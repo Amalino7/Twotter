@@ -4,10 +4,11 @@ val exposed_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
     id("io.ktor.plugin") version "3.1.3"
 }
 
-group = "com.example"
+group = "elsys.amalino7"
 version = "0.0.1"
 
 application {
@@ -53,7 +54,6 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.2")
     implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
-    implementation("io.ktor:ktor-serialization-gson:3.1.3")
 
 
     // tests
