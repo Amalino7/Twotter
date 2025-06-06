@@ -30,6 +30,10 @@ services:
     ports:
       - "7080:7080"
       - "7443:7443"
+    volumes:
+      - ./keycloak-config:/opt/keycloak/data/import
+      - keycloak-data:/opt/keycloak/data
+
   db:
     image: postgres:17
     restart: always
@@ -46,3 +50,4 @@ services:
 
 volumes:
   postgres_data:
+  keycloak-data:

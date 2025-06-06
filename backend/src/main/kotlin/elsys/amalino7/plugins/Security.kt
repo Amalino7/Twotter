@@ -15,11 +15,11 @@ fun Application.configureSecurity() {
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "keycloak",
-                    authorizeUrl = "http://localhost:7080/realms/kotlin/protocol/openid-connect/auth",
-                    accessTokenUrl = "http://localhost:7080/realms/kotlin/protocol/openid-connect/token",
+                    authorizeUrl = "http://localhost:7080/realms/Ktor Auth/protocol/openid-connect/auth",
+                    accessTokenUrl = "http://localhost:7080/realms/Ktor Auth/protocol/openid-connect/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = "ktor",
-                    clientSecret = "iMtUPKeEYOrJzjghLewLOC02L6qkstxo", // TODO fix
+                    clientId = "ktor backend",
+                    clientSecret = "1inPVKbpeQVpUPFQNNZxfRZf3XlTMDMK", // TODO fix
                     defaultScopes = listOf("openid", "profile", "email")
                 )
             }

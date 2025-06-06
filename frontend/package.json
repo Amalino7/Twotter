@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "bun run dev",
     "test": "vitest",
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
