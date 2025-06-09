@@ -41,15 +41,20 @@ fun Application.configureSecurity() {
 
         val jwtDomain = "http://localhost:7080/realms/KtorAuth"
         val jwtRealm = "KtorAuth"
-        val jwkProvider = UrlJwkProvider(URL(jwtDomain))
+        val jwkProvider = UrlJwkProvider(URL("$jwtDomain/protocol/openid-connect/certs"))
         jwt("auth-jwt") {
             realm = jwtRealm
             verifier(jwkProvider, jwtDomain) {
-                acceptLeeway(3)
                 withAudience("ktor")
             }
             validate { credential ->
+                println("JWT validate triggered: issuer=${credential.payload.issuer}, audience=${credential.payload.audience}")
                 if (credential.payload.audience.contains("ktor")) JWTPrincipal(credential.payload) else null
+            }
+
+            challenge { defaultScheme, realm ->
+                println("JWT challenge triggered: issuer=${jwtDomain}, audience=ktor")
+                call.respond(HttpStatusCode.Unauthorized, "Token validation failed")
             }
         }
     }

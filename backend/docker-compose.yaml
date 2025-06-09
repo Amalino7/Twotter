@@ -1,9 +1,11 @@
 services:
-  mailhog:
-    image: axllent/mailpit
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+  #  postfix:
+  #    image: catatnight/postfix
+  #    environment:
+  #      - maildomain=example.com
+  #      - smtp_user=user:password
+  #    ports:
+  #      - "25:25"
   #  backend:
   #    build: .
   #    ports:
@@ -27,14 +29,16 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_LOG_LEVEL: info
       
-      KC_EMAIL_FROM: no-reply@example.com
+      KC_EMAIL_FROM: alex.m.malinov@gmail.com
       KC_EMAIL_FROM_DISPLAY_NAME: "Keycloak Admin"
       KC_EMAIL_REPLY_TO: support@example.com
       KC_EMAIL_REPLY_TO_DISPLAY_NAME: "Support Team"
-      KC_EMAIL_SMTP_HOST: mailhog
-      KC_EMAIL_SMTP_PORT: 1025
-      KC_EMAIL_SMTP_AUTH: false
-      KC_EMAIL_SMTP_STARTTLS: false
+      KC_EMAIL_SMTP_HOST: smtp.gmail.com
+      KC_EMAIL_SMTP_PORT: 587
+      KC_EMAIL_SMTP_AUTH: true
+      KC_EMAIL_SMTP_USER: alex.m.malinov@gmail.com
+      KC_EMAIL_SMTP_PASSWORD: wwlchvqbvnnbtmik
+      KC_EMAIL_SMTP_STARTTLS: true
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:7080/health/ready" ]
       interval: 15s
