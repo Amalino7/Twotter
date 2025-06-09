@@ -1,12 +1,24 @@
 package elsys.amalino7.plugins
 
+import com.auth0.jwk.UrlJwkProvider
+import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import java.net.URL
+import java.security.interfaces.RSAPublicKey
 
 fun Application.configureSecurity() {
     authentication {
@@ -15,48 +27,58 @@ fun Application.configureSecurity() {
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "keycloak",
-                    authorizeUrl = "http://localhost:7080/realms/Ktor Auth/protocol/openid-connect/auth",
-                    accessTokenUrl = "http://localhost:7080/realms/Ktor Auth/protocol/openid-connect/token",
+                    authorizeUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/auth",
+                    accessTokenUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/token",
+
                     requestMethod = HttpMethod.Post,
-                    clientId = "ktor backend",
-                    clientSecret = "1inPVKbpeQVpUPFQNNZxfRZf3XlTMDMK", // TODO fix
-                    defaultScopes = listOf("openid", "profile", "email")
+                    clientId = "ktor",
+                    clientSecret = dotenv().get("CLIENT_SECRET"),
+                    defaultScopes = listOf("openid", "profile")
                 )
             }
             client = HttpClient(Apache)
         }
+
+        val jwtDomain = "http://localhost:7080/realms/KtorAuth"
+        val jwtRealm = "KtorAuth"
+        val jwkProvider = UrlJwkProvider(URL(jwtDomain))
+        jwt("auth-jwt") {
+            realm = jwtRealm
+            verifier(jwkProvider, jwtDomain) {
+                acceptLeeway(3)
+                withAudience("ktor")
+            }
+            validate { credential ->
+                if (credential.payload.audience.contains("ktor")) JWTPrincipal(credential.payload) else null
+            }
+        }
     }
-//    // Please read the jwt property from the config file if you are using EngineMain
-//    val jwtAudience = "jwt-audience"
-//    val jwtDomain = "https://jwt-provider-domain/"
-//    val jwtRealm = "ktor sample app"
-//    val jwtSecret = "secret"
-//    authentication {
-//        jwt {
-//            realm = jwtRealm
-//            verifier(
-//                JWT
-//                    .require(Algorithm.HMAC256(jwtSecret))
-//                    .withAudience(jwtAudience)
-//                    .withIssuer(jwtDomain)
-//                    .build()
-//            )
-//            validate { credential ->
-//                if (credential.payload.audience.contains(jwtAudience)) JWTPrincipal(credential.payload) else null
-//            }
-//        }
-//    }
+
     routing {
         authenticate("keycloakOAuth") {
             get("login") {
-                call.respondRedirect("/callback")
+                // redirects
             }
 
             get("/callback") {
                 val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
+
                 if (principal != null) {
                     val accessToken = principal.accessToken
-                    call.respondText("Access token: $accessToken")
+
+                    val client = HttpClient(Apache) {
+                        install(ContentNegotiation) {
+                            json()
+                        }
+                    }
+                    val res: KeycloakUserInfo =
+                        client.get("http://localhost:7080/realms/KtorAuth/protocol/openid-connect/userinfo")
+                        {
+                            header("Authorization", "Bearer $accessToken")
+                        }.body()
+
+                    call.respondText("User info:\n${res} Access token: $accessToken\n")
+
                 } else {
                     call.respond(HttpStatusCode.Unauthorized, "No token")
                 }
@@ -64,5 +86,20 @@ fun Application.configureSecurity() {
         }
     }
 }
+
+fun publicKeyFromKeycloak(): RSAPublicKey {
+    val jwkProvider = UrlJwkProvider(URL("http://localhost:7080/realms/KtorAuth"))
+    val key = jwkProvider.get("public_key")
+    return key.publicKey as RSAPublicKey
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+@JsonIgnoreUnknownKeys
+@Serializable
+data class KeycloakUserInfo(
+    val sub: String,
+    val email: String,
+    val name: String
+)
 
 

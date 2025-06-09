@@ -24,6 +24,7 @@ data class PostCreateRequest(
 )
 
 fun Post.toResponse() =
-    PostResponse(id.toString(), content, imageUrl, userId.toString(), Clock.System.now(), Clock.System.now())
+    PostResponse(id.toString(), content, imageUrl, userId.toString(), createdAt!!, updatedAt!!)
 
-fun PostCreateRequest.toPost() = Post(UUID.randomUUID(), content, imageUrl, UUID.fromString(userId), null, null)
+fun PostCreateRequest.toPost() =
+    Post(UUID.randomUUID(), content, imageUrl, UUID.fromString(userId), Clock.System.now(), Clock.System.now())

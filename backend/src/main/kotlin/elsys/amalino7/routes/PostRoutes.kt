@@ -36,4 +36,14 @@ fun Route.postRoute() {
             call.respond(HttpStatusCode.NotFound)
         }
     }
+    get("/users/{id}/posts") {
+        val userId = call.parameters["id"]!!
+        val posts = PostRepositoryImpl().getPostsOfUser(userId = UUID.fromString(userId))
+        call.respond(posts.map { it.toResponse() })
+    }
+    get("/users/{id}/feed") {
+        val userId = call.parameters["id"]!!
+        val posts = PostRepositoryImpl().getPostsOfUserByCriteria(userId = UUID.fromString(userId))
+        call.respond(posts.map { it.toResponse() })
+    }
 }

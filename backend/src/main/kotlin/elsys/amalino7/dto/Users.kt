@@ -28,8 +28,11 @@ fun User.toResponse() = UserResponse(
 )
 
 fun UserCreateRequest.toUser() = User(
-    UUID.randomUUID(), "", name, email, null, null, Clock.System.now(), Clock.System.now()
+    UUID.randomUUID(), UUID.randomUUID().toString(), name, email, null, null, Clock.System.now(), Clock.System.now()
 )
+
+@Serializable
+data class FollowerCreateRequest(val userId: String)
 
 
 

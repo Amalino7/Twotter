@@ -1,8 +1,11 @@
 package elsys.amalino7.db
 
+import Follows
 import Posts
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.repositories.PostRepository
+import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertReturning
@@ -48,6 +51,22 @@ class PostRepositoryImpl : PostRepository {
 
     suspend fun findBy(criteria: Map<String, Any>): List<Post> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun getPostsOfUser(userId: UUID): List<Post> {
+        return transaction { Posts.selectAll().where { Posts.user eq userId }.map { it.toPost() } }
+    }
+
+    override suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post> {
+        return transaction {
+            Posts.join(
+                Follows,
+                JoinType.INNER,
+                additionalConstraint = { Posts.user eq Follows.followee }
+            ).selectAll()
+                .orderBy(Posts.createdAt, SortOrder.DESC)
+                .where { Follows.follower eq userId }.map { it.toPost() }
+        }
     }
 
 }
