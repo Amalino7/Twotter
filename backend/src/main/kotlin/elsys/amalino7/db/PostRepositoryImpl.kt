@@ -2,6 +2,7 @@ package elsys.amalino7.db
 
 import Follows
 import Posts
+import Users
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.repositories.PostRepository
 import org.jetbrains.exposed.v1.core.JoinType
@@ -21,14 +22,19 @@ class PostRepositoryImpl : PostRepository {
                 it[id] = item.id
                 it[content] = item.content
                 it[imageUrl] = item.imageUrl
-                it[user] = item.userId
+                it[user] = item.user.id
             }.single().toPost()
         }
     }
 
 
     override suspend fun getPostById(id: UUID): Post? {
-        return transaction { Posts.selectAll().where { Posts.id eq id }.singleOrNull()?.toPost() }
+        return transaction {
+            Posts.join(Users, JoinType.LEFT, Posts.user, Users.id)
+                .selectAll().where { Posts.id eq id }
+                .singleOrNull()
+                ?.toPost()
+        }
     }
 
     override suspend fun updatePost(id: UUID, item: Post): Boolean {
@@ -45,7 +51,9 @@ class PostRepositoryImpl : PostRepository {
 
     override suspend fun getAllPosts(): List<Post> {
         return transaction {
-            Posts.selectAll().map { it.toPost() }
+            Posts.join(Users, JoinType.LEFT, Posts.user, Users.id)
+                .selectAll()
+                .map { it.toPost() }
         }
     }
 
@@ -54,16 +62,22 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override suspend fun getPostsOfUser(userId: UUID): List<Post> {
-        return transaction { Posts.selectAll().where { Posts.user eq userId }.map { it.toPost() } }
+        return transaction {
+            Posts
+                .join(Users, JoinType.LEFT, Posts.user, Users.id)
+                .selectAll().where { Posts.user eq userId }.map { it.toPost() }
+        }
     }
 
     override suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post> {
         return transaction {
-            Posts.join(
-                Follows,
-                JoinType.INNER,
-                additionalConstraint = { Posts.user eq Follows.followee }
-            ).selectAll()
+            Posts
+                .join(Users, JoinType.LEFT, Posts.user, Users.id)
+                .join(
+                    Follows,
+                    JoinType.INNER,
+                    additionalConstraint = { Posts.user eq Follows.followee }
+                ).selectAll()
                 .orderBy(Posts.createdAt, SortOrder.DESC)
                 .where { Follows.follower eq userId }.map { it.toPost() }
         }

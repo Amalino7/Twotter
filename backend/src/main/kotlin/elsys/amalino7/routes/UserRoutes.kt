@@ -10,7 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-fun Route.userRoute() {
+fun Route.userRoute(userService: UserService) {
     authenticate("auth-jwt") {
         get("/users") {
             val users = UserService().getAllUsers()

@@ -51,6 +51,7 @@ services:
     volumes:
       - ./keycloak-config:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
+      - ./keycloak-theme/vue-theme:/opt/keycloak/themes/vue-theme
   
   db:
     image: postgres:17

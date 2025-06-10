@@ -82,7 +82,7 @@ fun Application.configureSecurity() {
                             header("Authorization", "Bearer $accessToken")
                         }.body()
 
-                    call.respondText("User info:\n${res} Access token: $accessToken\n")
+                    call.respondText("User info:\n${res} Access token: $accessToken\n Refresh token: ${principal.refreshToken}")
 
                 } else {
                     call.respond(HttpStatusCode.Unauthorized, "No token")

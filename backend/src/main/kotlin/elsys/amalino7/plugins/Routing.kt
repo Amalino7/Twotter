@@ -1,5 +1,9 @@
 package elsys.amalino7.plugins
 
+import elsys.amalino7.db.PostRepositoryImpl
+import elsys.amalino7.db.UserRepositoryImpl
+import elsys.amalino7.domain.services.PostService
+import elsys.amalino7.domain.services.UserService
 import elsys.amalino7.routes.postRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,8 +18,8 @@ fun Application.configureRouting() {
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
-    routing {
-        userRoute()
-        postRoute()
+    routing() {
+        userRoute(userService = UserService())
+        postRoute(postService = PostService(PostRepositoryImpl(), UserRepositoryImpl()))
     }
 }
