@@ -1,6 +1,7 @@
 package elsys.amalino7.domain.services
 
 import elsys.amalino7.domain.model.Post
+import elsys.amalino7.domain.model.User
 import elsys.amalino7.domain.repositories.PostRepository
 import elsys.amalino7.domain.repositories.UserRepository
 import elsys.amalino7.dto.PostCreateRequest
@@ -11,22 +12,17 @@ class PostService(
     val postRepo: PostRepository,
     val userRepo: UserRepository
 ) {
-    suspend fun createPost(PostCreateRequest: PostCreateRequest) {
-        val user = userRepo.getUserById(UUID.fromString(PostCreateRequest.userId))
-        if (user == null) {
-            throw Exception("User not found for post, id: ${PostCreateRequest.userId}")
-        }
-
+    suspend fun createPost(postCreateRequest: PostCreateRequest, user: User) {
         postRepo.addPost(
             Post(
                 UUID.randomUUID(),
-                PostCreateRequest.content,
-                imageUrl = PostCreateRequest.imageUrl,
+                postCreateRequest.content,
+                imageUrl = postCreateRequest.imageUrl,
                 user = user,
                 createdAt = Clock.System.now(),
                 updatedAt = Clock.System.now(),
             )
-        );
+        )
     }
 
     suspend fun getPostById(id: String) = postRepo.getPostById(UUID.fromString(id))

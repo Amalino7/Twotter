@@ -11,11 +11,9 @@ import io.ktor.server.routing.*
 import java.util.*
 
 fun Route.userRoute(userService: UserService) {
-    authenticate("auth-jwt") {
-        get("/users") {
-            val users = UserService().getAllUsers()
-            call.respond(users)
-        }
+    get("/users") {
+        val users = UserService().getAllUsers()
+        call.respond(users)
     }
     get("/users/{id}") {
         val userId = call.parameters["id"]!!
@@ -44,11 +42,14 @@ fun Route.userRoute(userService: UserService) {
         )
     }
 
-    post("/users") {
-        val userDto = call.receive<UserCreateRequest>()
-        val user = UserService().addUser(userDto)
-        call.respond(user)
+    authenticate("auth-jwt") {
+        post("/users") {
+            val userDto = call.receive<UserCreateRequest>()
+            val user = UserService().addUser(userDto)
+            call.respond(user)
+        }
     }
+
     delete("/users/{id}") {
         val userId = call.parameters["id"]!!
         val isDeleted = UserService().deleteUser(userId)

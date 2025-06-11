@@ -89,6 +89,14 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
+    override suspend fun getUserByKeycloakId(keycloakId: String): User? {
+        return transaction {
+            Users.selectAll()
+                .where(Users.keycloakId eq keycloakId)
+                .singleOrNull()?.toUser()
+        }
+    }
+
 //    override suspend fun addFollowingForUser(followerId: UUID, followingId: UUID): Boolean {
 //        return transaction {
 //            Follows.insertReturning {

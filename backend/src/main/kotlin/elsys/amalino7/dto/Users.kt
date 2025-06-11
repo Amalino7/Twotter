@@ -20,7 +20,8 @@ data class UserResponse(
 @Serializable
 data class UserCreateRequest(
     val name: String,
-    val email: String
+    val email: String,
+    val keycloakId: String
 )
 
 fun User.toResponse() = UserResponse(
@@ -28,7 +29,7 @@ fun User.toResponse() = UserResponse(
 )
 
 fun UserCreateRequest.toUser() = User(
-    UUID.randomUUID(), UUID.randomUUID().toString(), name, email, null, null, Clock.System.now(), Clock.System.now()
+    UUID.randomUUID(), keycloakId, name, email, null, null, Clock.System.now(), Clock.System.now()
 )
 
 @Serializable
