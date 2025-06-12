@@ -25,7 +25,7 @@ fun ResultRow.toPost(): Post {
     return Post(
         id = UUID.fromString(this[Posts.id].toString()),
         content = this[Posts.content],
-        userId = UUID.fromString(this[Posts.user].toString()),
+        user = this.toUser(),
         createdAt = this[Posts.createdAt].toKotlinInstant(),
         updatedAt = this[Posts.updatedAt].toKotlinInstant()
     )

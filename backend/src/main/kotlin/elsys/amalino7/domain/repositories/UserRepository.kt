@@ -9,4 +9,9 @@ interface UserRepository {
     suspend fun addUser(user: User): User
     suspend fun updateUser(user: User): Boolean
     suspend fun deleteUserById(id: UUID): Boolean
+    suspend fun getFollowersById(id: UUID): List<User>
+    suspend fun getFollowingById(id: UUID): List<User>
+    suspend fun addFollowerForUser(userId: UUID, followerId: UUID): Boolean
+    suspend fun getUserByKeycloakId(keycloakId: String): User?
+//    suspend fun addFollowingForUser(userId: UUID, followingId: UUID): Boolean
 }

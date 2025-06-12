@@ -8,7 +8,7 @@ data class Post(
     val id: UUID,
     val content: String,
     val imageUrl: String? = null,
-    val userId: UUID,
+    val user: User,
     val createdAt: Instant?,
     val updatedAt: Instant?
 )

@@ -17,14 +17,14 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/PostDTO"
+                  $ref: "#/components/schemas/PostResponse"
     post:
       description: ""
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostDTO"
+              $ref: "#/components/schemas/PostCreateRequest"
         required: true
       responses:
         "200":
@@ -32,35 +32,8 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PostDTO"
-  /users:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/UserDTO"
-    post:
-      description: ""
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserDTO"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserDTO"
-  /users/{id}:
+                $ref: "#/components/schemas/PostResponse"
+  /posts/{id}:
     get:
       description: ""
       parameters:
@@ -75,53 +48,240 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UserDTO"
-              examples:
-                Example#1:
-                  description: ""
-                  value:
-                    id: ""
-                    name: ""
-                    email: ""
+                $ref: "#/components/schemas/Object"
+    delete:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /users:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /users/{id}:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    delete:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /users/{id}/feed:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostResponse"
+  /users/{id}/followers:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowerCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /users/{id}/posts:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostResponse"
   /callback:
     get:
       description: ""
       responses:
-        "302":
-          description: "Found <br> Redirect"
+        "200":
+          description: "OK"
           content:
             text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
-                  value: "/hello"
+                  value: ""
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "No token"
   /login:
     get:
       description: ""
-      responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "/callback"
 components:
   schemas:
-    PostDTO:
+    Instant:
+      type: "object"
+      properties: { }
+    PostResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        content:
+          type: "string"
+        imageUrl:
+          type: "string"
+        userId:
+          type: "string"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        updatedAt:
+          $ref: "#/components/schemas/Instant"
+      required:
+        - "id"
+        - "content"
+        - "userId"
+        - "createdAt"
+        - "updatedAt"
+    PostCreateRequest:
       type: "object"
       properties:
         content:
           type: "string"
-        userID:
+        imageUrl:
+          type: "string"
+        userId:
           type: "string"
       required:
         - "content"
-        - "userID"
-    UserDTO:
+        - "userId"
+    Object:
+      type: "object"
+      properties: { }
+    UserResponse:
       type: "object"
       properties:
         id:
@@ -130,7 +290,34 @@ components:
           type: "string"
         email:
           type: "string"
+        bio:
+          type: "string"
+        displayName:
+          type: "string"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        updatedAt:
+          $ref: "#/components/schemas/Instant"
       required:
         - "id"
         - "name"
         - "email"
+        - "createdAt"
+        - "updatedAt"
+    UserCreateRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+      required:
+        - "name"
+        - "email"
+    FollowerCreateRequest:
+      type: "object"
+      properties:
+        userId:
+          type: "string"
+      required:
+        - "userId"

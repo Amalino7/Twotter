@@ -14,5 +14,5 @@ class UserService {
     suspend fun getAllUsers() = UserRepositoryImpl().getAllUsers().map { it.toResponse() }
     suspend fun deleteUser(id: String) = UserRepositoryImpl().deleteUserById(UUID.fromString(id))
     suspend fun getUserById(id: String) = UserRepositoryImpl().getUserById(UUID.fromString(id))?.toResponse()
-    suspend fun createUser(user: UserCreateRequest) = UserRepositoryImpl().addUser(user.toUser()).toResponse()
+    suspend fun getUserByKeycloakId(id: String) = UserRepositoryImpl().getUserByKeycloakId(id)
 }

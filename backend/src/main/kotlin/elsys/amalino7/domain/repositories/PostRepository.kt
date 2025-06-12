@@ -10,5 +10,7 @@ interface PostRepository {
     suspend fun updatePost(id: UUID, item: Post): Boolean
     suspend fun deletePostById(id: UUID): Boolean
     suspend fun getAllPosts(): List<Post>
+    suspend fun getPostsOfUser(userId: UUID): List<Post>
+    suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post>
 //    suspend fun findBy(criteria: Map<String, Any>): List<Post>
 }

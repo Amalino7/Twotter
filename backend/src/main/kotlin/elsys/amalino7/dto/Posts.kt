@@ -1,17 +1,16 @@
 package elsys.amalino7.dto
 
 import elsys.amalino7.domain.model.Post
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import java.util.*
 
 @Serializable
 data class PostResponse(
     val id: String,
     val content: String,
     val imageUrl: String? = null,
-    val userId: String,
+    val userHandle: String,
+    val userDisplayName: String? = null,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -24,6 +23,14 @@ data class PostCreateRequest(
 )
 
 fun Post.toResponse() =
-    PostResponse(id.toString(), content, imageUrl, userId.toString(), Clock.System.now(), Clock.System.now())
+    PostResponse(id.toString(), content, imageUrl, user.name, user.displayName, createdAt!!, updatedAt!!)
 
-fun PostCreateRequest.toPost() = Post(UUID.randomUUID(), content, imageUrl, UUID.fromString(userId), null, null)
+//suspend fun PostCreateRequest.toPost() =
+//    Post(
+//        UUID.randomUUID(),
+//        content,
+//        imageUrl,
+//        user = UserRepositoryImpl().getUserById(UUID.fromString(userId))!!, /// TODO refactor
+//        Clock.System.now(),
+//        Clock.System.now()
+//    )
