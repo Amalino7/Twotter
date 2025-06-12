@@ -1,4 +1,6 @@
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.alias
+import org.jetbrains.exposed.v1.core.countDistinct
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.javatime.CurrentTimestamp
 import org.jetbrains.exposed.v1.javatime.timestamp
@@ -34,10 +36,33 @@ object Follows : Table("follows") {
     override val primaryKey = PrimaryKey(follower, followee)
 }
 
-//// AUTH TOKENS
-//object AuthTokens : Table("auth_tokens") {
-//    val userId = reference("user_id", Users)
-//    val token = varchar("token", 512).primaryKey()
-//    val createdAt = timestamp("created_at")
-//    val expiresAt = timestamp("expires_at").nullable()
-//}
+object Likes : Table() {
+    val userId = reference("user_id", Users).uniqueIndex()
+    val postId = uuid("post_id").references(Posts.id).uniqueIndex()
+
+    init {
+        index(true, userId, postId) // Unique combo
+    }
+}
+
+object Comments : Table() {
+    val postId = reference("post_id", Posts).index()
+    val userId = reference("user_id", Users).index()
+    val content = text("content")
+    val timestamp = timestamp("created_at").defaultExpression(CurrentTimestamp)
+}
+
+object Reposts : Table("reposts") {
+    val userId = reference("user_id", Users).index()
+    val postId = reference("post_id", Posts).index()
+    val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
+
+    override val primaryKey = PrimaryKey(userId, postId)
+}
+
+
+object PostAggregates {
+    val likes = Likes.userId.countDistinct().alias("like_count")
+    val comments = Comments.userId.countDistinct().alias("comment_count")
+    val reposts = Reposts.userId.countDistinct().alias("repost_count")
+}

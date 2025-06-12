@@ -28,7 +28,7 @@ fun Application.connectToDatabase() {
         SchemaUtils.setSchema(schema = schema)
         SchemaUtils.createSchema(schema)
         val res = MigrationUtils.statementsRequiredForDatabaseMigration(
-            Users, Posts, Follows
+            Users, Posts, Follows, Likes, Comments, Reposts
         )
         res.forEach(::exec)
         println(res)

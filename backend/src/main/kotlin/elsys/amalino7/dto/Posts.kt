@@ -11,6 +11,10 @@ data class PostResponse(
     val imageUrl: String? = null,
     val userHandle: String,
     val userDisplayName: String? = null,
+    val hasLiked: Boolean,
+    val likesCount: Long,
+    val commentsCount: Long,
+    val repostsCount: Long,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -23,7 +27,19 @@ data class PostCreateRequest(
 )
 
 fun Post.toResponse() =
-    PostResponse(id.toString(), content, imageUrl, user.name, user.displayName, createdAt!!, updatedAt!!)
+    PostResponse(
+        id.toString(),
+        content,
+        imageUrl,
+        user.name,
+        user.displayName,
+        hasLiked,
+        likeCount,
+        commentCount,
+        repostCount,
+        createdAt!!,
+        updatedAt!!
+    )
 
 //suspend fun PostCreateRequest.toPost() =
 //    Post(

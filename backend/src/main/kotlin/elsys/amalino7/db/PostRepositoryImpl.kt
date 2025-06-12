@@ -1,18 +1,17 @@
 package elsys.amalino7.db
 
+import Comments
 import Follows
+import Likes
 import Posts
+import Reposts
 import Users
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.repositories.PostRepository
-import org.jetbrains.exposed.v1.core.JoinType
-import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
-import org.jetbrains.exposed.v1.jdbc.insertReturning
-import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.update
 import java.util.*
 
 class PostRepositoryImpl : PostRepository {
@@ -28,10 +27,31 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
+    private fun postQuery(userId: UUID? = null): Query {
+        val hasLikedAlias = Case()
+            .When((Likes.userId eq userId) and (Likes.postId eq Posts.id), booleanLiteral(true))
+            .Else(booleanLiteral(false))
+            .alias("has_liked")
+
+        return Posts
+            .join(Users, JoinType.INNER, Posts.user, Users.id)
+            .join(Likes, JoinType.LEFT, additionalConstraint = { Posts.id eq Likes.postId })
+            .join(Comments, JoinType.LEFT, additionalConstraint = { Posts.id eq Comments.postId })
+            .join(Reposts, JoinType.LEFT, additionalConstraint = { Posts.id eq Reposts.postId })
+            .select(
+                Posts.columns + Users.columns
+                        + Likes.userId.countDistinct().alias("like_count")
+                        + Comments.userId.countDistinct().alias("comment_count")
+                        + Reposts.userId.countDistinct().alias("repost_count")
+                        + hasLikedAlias
+            )
+            .groupBy(Posts.id, Users.id, Likes.userId, Likes.postId)
+    }
+
     override suspend fun getPostById(id: UUID): Post? {
         return transaction {
-            Posts.join(Users, JoinType.LEFT, Posts.user, Users.id)
-                .selectAll().where { Posts.id eq id }
+            postQuery()
+                .where { Posts.id eq id }
                 .singleOrNull()
                 ?.toPost()
         }
@@ -51,8 +71,8 @@ class PostRepositoryImpl : PostRepository {
 
     override suspend fun getAllPosts(): List<Post> {
         return transaction {
-            Posts.join(Users, JoinType.LEFT, Posts.user, Users.id)
-                .selectAll()
+            postQuery()
+                .limit(100)
                 .map { it.toPost() }
         }
     }
@@ -63,23 +83,22 @@ class PostRepositoryImpl : PostRepository {
 
     override suspend fun getPostsOfUser(userId: UUID): List<Post> {
         return transaction {
-            Posts
-                .join(Users, JoinType.LEFT, Posts.user, Users.id)
-                .selectAll().where { Posts.user eq userId }.map { it.toPost() }
+            postQuery().where { Posts.user eq userId }.map { it.toPost() }
         }
     }
 
     override suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post> {
         return transaction {
-            Posts
-                .join(Users, JoinType.LEFT, Posts.user, Users.id)
-                .join(
+            postQuery().adjustColumnSet {
+                innerJoin(
                     Follows,
-                    JoinType.INNER,
-                    additionalConstraint = { Posts.user eq Follows.followee }
-                ).selectAll()
+                    { Posts.user },
+                    { Follows.followee }
+                )
+            }
                 .orderBy(Posts.createdAt, SortOrder.DESC)
                 .where { Follows.follower eq userId }.map { it.toPost() }
+
         }
     }
 

@@ -1,12 +1,21 @@
 package elsys.amalino7.db
 
+import Likes
+import PostAggregates
 import Posts
 import Users
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.model.User
 import kotlinx.datetime.toKotlinInstant
-import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import java.util.*
+
+// TODO fix weird typing
+val hasLikedAlias = Case()
+    .When((Likes.userId eq null) and (Likes.postId eq Posts.id), booleanLiteral(true))
+    .Else(booleanLiteral(false))
+    .alias("has_liked")
 
 fun ResultRow.toUser(): User {
     return User(
@@ -27,6 +36,10 @@ fun ResultRow.toPost(): Post {
         content = this[Posts.content],
         user = this.toUser(),
         createdAt = this[Posts.createdAt].toKotlinInstant(),
-        updatedAt = this[Posts.updatedAt].toKotlinInstant()
+        updatedAt = this[Posts.updatedAt].toKotlinInstant(),
+        likeCount = this[PostAggregates.likes],
+        commentCount = this[PostAggregates.comments],
+        repostCount = this[PostAggregates.reposts],
+        hasLiked = this[hasLikedAlias],
     )
 }

@@ -19,6 +19,10 @@ class PostService(
                 postCreateRequest.content,
                 imageUrl = postCreateRequest.imageUrl,
                 user = user,
+                likeCount = 0,
+                commentCount = 0,
+                repostCount = 0,
+                hasLiked = false,
                 createdAt = Clock.System.now(),
                 updatedAt = Clock.System.now(),
             )
