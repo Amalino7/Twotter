@@ -1,8 +1,6 @@
 package elsys.amalino7.plugins
 
 import com.auth0.jwk.UrlJwkProvider
-import elsys.amalino7.domain.services.UserService
-import elsys.amalino7.dto.UserCreateRequest
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -20,6 +18,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import java.net.URL
+import java.security.interfaces.RSAPublicKey
 
 fun Application.configureSecurity() {
     authentication {
@@ -34,7 +33,7 @@ fun Application.configureSecurity() {
                     requestMethod = HttpMethod.Post,
                     clientId = "ktor",
                     clientSecret = dotenv().get("CLIENT_SECRET"),
-                    defaultScopes = listOf("openid", "profile", "email")
+                    defaultScopes = listOf("openid", "profile")
                 )
             }
             client = HttpClient(Apache)
@@ -47,14 +46,13 @@ fun Application.configureSecurity() {
             realm = jwtRealm
             verifier(jwkProvider, jwtDomain) {
                 withAudience("ktor")
-                withIssuer(jwtDomain)
             }
             validate { credential ->
                 println("JWT validate triggered: issuer=${credential.payload.issuer}, audience=${credential.payload.audience}")
                 if (credential.payload.audience.contains("ktor")) JWTPrincipal(credential.payload) else null
             }
 
-            challenge { _, _ ->
+            challenge { defaultScheme, realm ->
                 println("JWT challenge triggered: issuer=${jwtDomain}, audience=ktor")
                 call.respond(HttpStatusCode.Unauthorized, "Token validation failed")
             }
@@ -63,17 +61,6 @@ fun Application.configureSecurity() {
 
     routing {
         authenticate("keycloakOAuth") {
-            post("/logout") {
-                val accessToken = call.principal<OAuthAccessTokenResponse.OAuth2>()?.accessToken
-                val client = HttpClient(Apache) {
-                    install(ContentNegotiation) {
-                        json()
-                    }
-                }
-                client.post("http://localhost:7080/realms/KtorAuth/protocol/openid-connect/logout") {
-                    header("Authorization", "Bearer $accessToken")
-                }
-            }
             get("login") {
                 // redirects
             }
@@ -94,16 +81,7 @@ fun Application.configureSecurity() {
                         {
                             header("Authorization", "Bearer $accessToken")
                         }.body()
-                    client.close()
 
-                    val user = UserService().getUserByKeycloakId(res.sub)
-                    if (user == null) UserService().addUser(
-                        UserCreateRequest(
-                            res.preferred_username,
-                            res.email,
-                            res.sub
-                        )
-                    )
                     call.respondText("User info:\n${res} Access token: $accessToken\n Refresh token: ${principal.refreshToken}")
 
                 } else {
@@ -114,13 +92,19 @@ fun Application.configureSecurity() {
     }
 }
 
+fun publicKeyFromKeycloak(): RSAPublicKey {
+    val jwkProvider = UrlJwkProvider(URL("http://localhost:7080/realms/KtorAuth"))
+    val key = jwkProvider.get("public_key")
+    return key.publicKey as RSAPublicKey
+}
+
 @OptIn(ExperimentalSerializationApi::class)
 @JsonIgnoreUnknownKeys
 @Serializable
 data class KeycloakUserInfo(
     val sub: String,
     val email: String,
-    val preferred_username: String,
+    val name: String
 )
 
 
