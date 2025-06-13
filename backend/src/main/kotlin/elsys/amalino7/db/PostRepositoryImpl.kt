@@ -17,21 +17,30 @@ import java.util.*
 class PostRepositoryImpl : PostRepository {
     override suspend fun addPost(item: Post): Post {
         return transaction {
-            Posts.insertReturning {
+            val postId = Posts.insertAndGetId {
                 it[id] = item.id
                 it[content] = item.content
                 it[imageUrl] = item.imageUrl
                 it[user] = item.user.id
-            }.single().toPost()
+            }
+            return@transaction Posts
+                .join(Users, JoinType.INNER, Comments.userId, Users.id)
+                .selectAll()
+                .where { Posts.id eq postId }
+                .single().toPost(hasLikedAlias(item.user.id))
         }
     }
 
+    private fun hasLikedCase(userId: UUID) = Case()
+        .When((Likes.userId eq userId) and (Likes.postId eq Posts.id), booleanLiteral(true))
+        .Else(booleanLiteral(false))
+        .alias("has_liked")
+
+    private fun hasLikedAlias(userId: UUID?) =
+        if (userId != null) hasLikedCase(userId) else booleanLiteral(false).alias("has_liked")
 
     private fun postQuery(userId: UUID? = null): Query {
-        val hasLikedAlias = Case()
-            .When((Likes.userId eq userId) and (Likes.postId eq Posts.id), booleanLiteral(true))
-            .Else(booleanLiteral(false))
-            .alias("has_liked")
+        val hasLikedAlias = hasLikedAlias(userId)
 
         return Posts
             .join(Users, JoinType.INNER, Posts.user, Users.id)
@@ -48,12 +57,12 @@ class PostRepositoryImpl : PostRepository {
             .groupBy(Posts.id, Users.id, Likes.userId, Likes.postId)
     }
 
-    override suspend fun getPostById(id: UUID): Post? {
+    override suspend fun getPostById(id: UUID, requesterId: UUID?): Post? {
         return transaction {
-            postQuery()
+            postQuery(requesterId)
                 .where { Posts.id eq id }
                 .singleOrNull()
-                ?.toPost()
+                ?.toPost(hasLikedAlias(requesterId))
         }
     }
 
@@ -69,11 +78,14 @@ class PostRepositoryImpl : PostRepository {
         return transaction { Posts.deleteWhere { Posts.id eq id } > 0 }
     }
 
-    override suspend fun getAllPosts(): List<Post> {
+    override suspend fun getAllPosts(requesterId: UUID?): List<Post> {
         return transaction {
             postQuery()
                 .limit(100)
-                .map { it.toPost() }
+                .map {
+                    println(it)
+                    it.toPost(hasLikedAlias(requesterId))
+                }
         }
     }
 
@@ -81,23 +93,23 @@ class PostRepositoryImpl : PostRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getPostsOfUser(userId: UUID): List<Post> {
+    override suspend fun getPostsOfUser(userId: UUID, requesterId: UUID?): List<Post> {
         return transaction {
-            postQuery().where { Posts.user eq userId }.map { it.toPost() }
+            postQuery(requesterId).where { Posts.user eq userId }.map { it.toPost(hasLikedAlias(requesterId)) }
         }
     }
 
     override suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post> {
         return transaction {
-            postQuery().adjustColumnSet {
+            postQuery(userId).adjustColumnSet {
                 innerJoin(
                     Follows,
                     { Posts.user },
-                    { Follows.followee }
+                    { followee }
                 )
             }
                 .orderBy(Posts.createdAt, SortOrder.DESC)
-                .where { Follows.follower eq userId }.map { it.toPost() }
+                .where { Follows.follower eq userId }.map { it.toPost(hasLikedAlias(userId)) }
 
         }
     }

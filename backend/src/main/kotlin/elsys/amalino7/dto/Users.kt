@@ -14,7 +14,8 @@ data class UserResponse(
     val bio: String? = null,
     val displayName: String? = null,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val keycloakId: String,
 )
 
 @Serializable
@@ -25,7 +26,7 @@ data class UserCreateRequest(
 )
 
 fun User.toResponse() = UserResponse(
-    id.toString(), name, email, bio, displayName, createdAt, updatedAt
+    id.toString(), name, email, bio, displayName, createdAt, updatedAt, keycloakId
 )
 
 fun UserCreateRequest.toUser() = User(

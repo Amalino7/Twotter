@@ -1,45 +1,78 @@
 package elsys.amalino7.routes
 
+import com.auth0.jwt.interfaces.Payload
+import elsys.amalino7.domain.model.User
 import elsys.amalino7.domain.services.PostService
 import elsys.amalino7.domain.services.UserService
 import elsys.amalino7.dto.PostCreateRequest
 import elsys.amalino7.dto.toResponse
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
+private suspend fun getUserId(principal: JWTPrincipal?): String? {
+    if (principal == null) {
+        return null
+    }
+    val subId = principal.payload.getClaim("sub").asString()
+    val user =
+        UserService().getUserByKeycloakId(subId) ?: return null
+    return user.id.toString()
+}
+
+private suspend fun ApplicationCall.verifyUser(
+    userId: String,
+    jwtPayload: Payload
+): User? {
+    val userKeycloakId = jwtPayload.getClaim("sub").asString()
+    val userEmail = jwtPayload.getClaim("email").asString()
+
+    val user = UserService().getUserByKeycloakId(userKeycloakId)
+    if (user == null) {
+        this.respond(HttpStatusCode.Unauthorized, "User claim not found")
+        return null
+    }
+    if (user.id.toString() != userId || user.email != userEmail) {
+        this.respond(HttpStatusCode.Unauthorized, "User id not match")
+        return null
+    }
+    return user
+}
+
 fun Route.postRoute(postService: PostService) {
-    get("/posts") {
-        val PostDTOs = postService.getAllPosts().map { it.toResponse() }
-        call.respond(PostDTOs)
+
+    authenticate("auth-jwt", optional = true) {
+        get("/posts") {
+            val userId = getUserId(call.principal<JWTPrincipal>())
+            val PostDTOs = postService.getAllPosts(userId).map { it.toResponse() }
+            call.respond(PostDTOs)
+        }
+        get("/posts/{id}") {
+            val userId = getUserId(call.principal<JWTPrincipal>())
+            val id = call.parameters["id"]!!
+            val response = postService.getPostById(id, requesterId = userId)?.toResponse()
+            call.respond(response ?: HttpStatusCode.NotFound)
+        }
+
+        get("/users/{id}/posts") {
+            val userId = call.parameters["id"]!!
+            val posts = postService.getPostsOfUser(userId = userId, requesterId = getUserId(call.principal()))
+            call.respond(posts.map { it.toResponse() })
+        }
     }
-    get("/posts/{id}") {
-        val id = call.parameters["id"]!!
-        val response = postService.getPostById(id)?.toResponse()
-        call.respond(response ?: HttpStatusCode.NotFound)
-    }
+
+
     authenticate("auth-jwt") {
         post("/posts") {
             val post = call.receive<PostCreateRequest>()
-            val principal = call.principal<JWTPrincipal>()!!.payload
-            val keycloakId = principal.getClaim("sub").asString()
-            val user = UserService().getUserByKeycloakId(keycloakId)
-                ?: return@post call.respond(HttpStatusCode.Unauthorized, "User claim not found")
-
-            if (user.id.toString() != post.userId || user.email != principal.getClaim("email")
-                    .asString()
-            ) {
-                return@post call.respond(HttpStatusCode.Unauthorized, "User id not match")
-            }
-
+            val user = call.verifyUser(post.userId, call.principal<JWTPrincipal>()!!.payload) ?: return@post
             val returnedPost = postService.createPost(post, user)
             return@post call.respond(returnedPost)
         }
-    }
-    authenticate("auth-jwt") {
         delete("/posts/{id}") {
             val id = call.parameters["id"]!!
             val principal = call.principal<JWTPrincipal>()!!.payload
@@ -56,21 +89,13 @@ fun Route.postRoute(postService: PostService) {
                 return@delete
             }
 
-            val isDeleted = postService.deletePostById(id)
+            val isDeleted = postService.deletePostById(id = id)
             if (isDeleted) {
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, "Post deleted")
             } else {
-                call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.NotFound, "Post not found")
             }
         }
-    }
-    get("/users/{id}/posts") {
-        val userId = call.parameters["id"]!!
-        val posts = postService.getPostsOfUser(userId = userId)
-        call.respond(posts.map { it.toResponse() })
-    }
-    authenticate("auth-jwt")
-    {
         get("/users/{id}/feed") {
             val userId = call.parameters["id"]!!
             val principal = call.principal<JWTPrincipal>()!!.payload

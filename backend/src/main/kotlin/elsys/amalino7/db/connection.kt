@@ -23,7 +23,7 @@ fun Application.connectToDatabase() {
     Database.connect(dataSource)
 
     //scuffed migration
-    val statements = transaction {
+    transaction {
         val schema = Schema("app") // my_schema is the schema name.
         SchemaUtils.setSchema(schema = schema)
         SchemaUtils.createSchema(schema)

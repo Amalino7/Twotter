@@ -10,8 +10,8 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     connectToDatabase()
-    configureHTTP()
     configureSecurity()
+    configureHTTP()
     configureSerialization()
     configureMonitoring()
 //    configureAdministration()

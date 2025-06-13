@@ -7,6 +7,7 @@ import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.openapi.*
 import io.ktor.server.routing.*
 
+
 fun Application.configureHTTP() {
     install(CORS) {
         allowMethod(HttpMethod.Options)
@@ -15,6 +16,9 @@ fun Application.configureHTTP() {
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
         allowHeader("MyCustomHeader")
+        allowHeader(HttpHeaders.ContentType)
+        this.allowCredentials = true
+        allowHeaders { true }
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
     install(DefaultHeaders) {

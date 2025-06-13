@@ -29,9 +29,23 @@ class PostService(
         )
     }
 
-    suspend fun getPostById(id: String) = postRepo.getPostById(UUID.fromString(id))
+    suspend fun getPostById(id: String, requesterId: String? = null): Post? {
+        return postRepo.getPostById(UUID.fromString(id), requesterId?.let { UUID.fromString(it) })
+    }
+
     suspend fun deletePostById(id: String) = postRepo.deletePostById(UUID.fromString(id))
-    suspend fun getAllPosts() = postRepo.getAllPosts()
-    suspend fun getPostsOfUser(userId: String) = postRepo.getPostsOfUser(UUID.fromString(userId))
+    suspend fun getAllPosts(requestId: String? = null): List<Post> {
+        if (requestId == null) {
+            return postRepo.getAllPosts(null)
+        }
+        return postRepo.getAllPosts(UUID.fromString(requestId))
+    }
+
+    suspend fun getPostsOfUser(userId: String, requesterId: String? = null): List<Post> {
+        if (requesterId == null) {
+            return postRepo.getPostsOfUser(UUID.fromString(userId))
+        } else return postRepo.getPostsOfUser(UUID.fromString(userId), UUID.fromString(requesterId))
+    }
+
     suspend fun getPostsOfUserByCriteria(userId: String) = postRepo.getPostsOfUserByCriteria(UUID.fromString(userId))
 }

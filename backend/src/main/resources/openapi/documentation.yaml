@@ -4,7 +4,7 @@ info:
   description: "backend API"
   version: "1.0.0"
 servers:
-  - url: "https://backend"
+  - url: "http://localhost:8080"
 paths:
   /posts:
     get:
@@ -27,13 +27,58 @@ paths:
               $ref: "#/components/schemas/PostCreateRequest"
         required: true
       responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "User id not match"
+                Example#2:
+                  value: "User claim not found"
         "200":
           description: "OK"
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PostResponse"
+                $ref: "#/components/schemas/Unit"
   /posts/{id}:
+    delete:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "User id not match"
+                Example#2:
+                  value: "User id not match"
+                Example#3:
+                  value: "User claim not found"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
     get:
       description: ""
       parameters:
@@ -49,27 +94,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Object"
-    delete:
-      description: ""
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-        "404":
-          description: "Not Found"
-          content:
-            '*/*':
-              schema:
-                type: "object"
   /users:
     get:
       description: ""
@@ -98,27 +122,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
   /users/{id}:
-    get:
-      description: ""
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "404":
-          description: "Not Found"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/UserResponse"
     delete:
       description: ""
       parameters:
@@ -140,7 +143,6 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /users/{id}/feed:
     get:
       description: ""
       parameters:
@@ -150,6 +152,45 @@ paths:
           schema:
             type: "string"
       responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /users/{id}/feed:
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostCreateRequest"
+        required: true
+      responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "User id not match"
+                Example#2:
+                  value: "User claim not found"
         "200":
           description: "OK"
           content:
@@ -240,6 +281,41 @@ paths:
   /login:
     get:
       description: ""
+  /logout:
+    post:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /refresh:
+    post:
+      description: ""
+      parameters:
+        - name: "refresh_token"
+          in: "cookie"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+              examples:
+                Example#1:
+                  value: "Refresh failed"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Map_String"
 components:
   schemas:
     Instant:
@@ -254,8 +330,21 @@ components:
           type: "string"
         imageUrl:
           type: "string"
-        userId:
+        userHandle:
           type: "string"
+        userDisplayName:
+          type: "string"
+        hasLiked:
+          type: "boolean"
+        likesCount:
+          type: "integer"
+          format: "int64"
+        commentsCount:
+          type: "integer"
+          format: "int64"
+        repostsCount:
+          type: "integer"
+          format: "int64"
         createdAt:
           $ref: "#/components/schemas/Instant"
         updatedAt:
@@ -263,7 +352,7 @@ components:
       required:
         - "id"
         - "content"
-        - "userId"
+        - "userHandle"
         - "createdAt"
         - "updatedAt"
     PostCreateRequest:
@@ -278,6 +367,9 @@ components:
       required:
         - "content"
         - "userId"
+    Unit:
+      type: "object"
+      properties: { }
     Object:
       type: "object"
       properties: { }
@@ -298,12 +390,15 @@ components:
           $ref: "#/components/schemas/Instant"
         updatedAt:
           $ref: "#/components/schemas/Instant"
+        keycloakId:
+          type: "string"
       required:
         - "id"
         - "name"
         - "email"
         - "createdAt"
         - "updatedAt"
+        - "keycloakId"
     UserCreateRequest:
       type: "object"
       properties:
@@ -311,9 +406,12 @@ components:
           type: "string"
         email:
           type: "string"
+        keycloakId:
+          type: "string"
       required:
         - "name"
         - "email"
+        - "keycloakId"
     FollowerCreateRequest:
       type: "object"
       properties:
@@ -321,3 +419,8 @@ components:
           type: "string"
       required:
         - "userId"
+    Map:
+      type: "object"
+      properties: { }
+    Map_String:
+      type: "string"

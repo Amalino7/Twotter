@@ -35,11 +35,11 @@ fun Application.configureSecurity() {
                     name = "keycloak",
                     authorizeUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/auth",
                     accessTokenUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/token",
-
                     requestMethod = HttpMethod.Post,
                     clientId = "ktor",
                     clientSecret = dotenv().get("CLIENT_SECRET"),
                     defaultScopes = listOf("openid", "profile")
+
                 )
             }
             client = HttpClient(Apache)
@@ -54,7 +54,7 @@ fun Application.configureSecurity() {
                 if (credential.payload.audience.contains("ktor")) JWTPrincipal(credential.payload) else null
             }
 
-            challenge { defaultScheme, realm ->
+            challenge { _, _ ->
                 println("JWT challenge triggered: issuer=${jwtDomain}, audience=ktor")
                 call.respond(HttpStatusCode.Unauthorized, "Token validation failed")
             }
@@ -160,7 +160,8 @@ fun Application.configureSecurity() {
 data class KeycloakUserInfo(
     val sub: String,
     val email: String,
-    val name: String
+    val preferred_username: String,
+//    val username: String
 )
 
 @Serializable

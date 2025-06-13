@@ -1,21 +1,17 @@
 package elsys.amalino7.db
 
-import Likes
+import Comments
 import PostAggregates
 import Posts
 import Users
+import elsys.amalino7.domain.model.Comment
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.model.User
 import kotlinx.datetime.toKotlinInstant
-import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.ExpressionWithColumnTypeAlias
+import org.jetbrains.exposed.v1.core.ResultRow
 import java.util.*
 
-// TODO fix weird typing
-val hasLikedAlias = Case()
-    .When((Likes.userId eq null) and (Likes.postId eq Posts.id), booleanLiteral(true))
-    .Else(booleanLiteral(false))
-    .alias("has_liked")
 
 fun ResultRow.toUser(): User {
     return User(
@@ -30,16 +26,25 @@ fun ResultRow.toUser(): User {
     )
 }
 
-fun ResultRow.toPost(): Post {
+fun ResultRow.toPost(hasLiked: ExpressionWithColumnTypeAlias<Boolean>): Post {
     return Post(
         id = UUID.fromString(this[Posts.id].toString()),
         content = this[Posts.content],
         user = this.toUser(),
         createdAt = this[Posts.createdAt].toKotlinInstant(),
         updatedAt = this[Posts.updatedAt].toKotlinInstant(),
-        likeCount = this[PostAggregates.likes],
-        commentCount = this[PostAggregates.comments],
-        repostCount = this[PostAggregates.reposts],
-        hasLiked = this[hasLikedAlias],
+        likeCount = this.getOrNull(PostAggregates.likes) ?: 0,
+        commentCount = this.getOrNull(PostAggregates.comments) ?: 0,
+        repostCount = this.getOrNull(PostAggregates.reposts) ?: 0,
+        hasLiked = this.getOrNull(hasLiked) ?: false,
+    )
+}
+
+fun ResultRow.toComment(): Comment {
+    return Comment(
+        id = this[Comments.id].toString().toInt(),
+        content = this[Comments.content],
+        user = this.toUser(),
+        postId = UUID.fromString(this[Comments.postId].toString()),
     )
 }
