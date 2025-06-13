@@ -17,12 +17,44 @@ import java.util.*
 // --- Ktor Routing for Comments API ---
 fun Route.commentsRoute(commentsService: CommentRepository) {
     // Protect all comment routes with the "auth-jwt" authentication provider
+    route("/comments") {
+        get("/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Comment ID must be a valid integer.")
+                return@get
+            }
+
+            val comment = commentsService.getCommentById(id)
+            if (comment == null) {
+                call.respond(HttpStatusCode.NotFound, "Comment with ID $id not found.")
+            } else {
+                call.respond(HttpStatusCode.OK, comment.toResponse())
+            }
+        }
+
+        // GET /comments/post/{postId} - Get all comments for a specific post
+        get("/post/{postId}") {
+            val postIdString = call.parameters["postId"]
+            val postId = try {
+                UUID.fromString(postIdString)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid Post ID format.")
+                return@get
+            }
+
+            val comments = commentsService.getCommentsByPostId(postId)
+            call.respond(HttpStatusCode.OK, comments.map { it.toResponse() })
+        }
+    }
+
+
     authenticate("auth-jwt") {
         route("/comments") {
             // POST /comments - Add a new comment
             post {
                 val principal = call.principal<JWTPrincipal>()
-                val keycloakId = principal?.payload?.getClaim("keycloakId")?.asString()
+                val keycloakId = principal?.payload?.getClaim("sub")?.asString()
 
                 if (keycloakId == null) {
                     call.respond(HttpStatusCode.Unauthorized, "Missing Keycloak ID in token payload.")
@@ -51,34 +83,7 @@ fun Route.commentsRoute(commentsService: CommentRepository) {
             }
 
             // GET /comments/{id} - Get a comment by its ID
-            get("/{id}") {
-                val id = call.parameters["id"]?.toIntOrNull()
-                if (id == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Comment ID must be a valid integer.")
-                    return@get
-                }
 
-                val comment = commentsService.getCommentById(id)
-                if (comment == null) {
-                    call.respond(HttpStatusCode.NotFound, "Comment with ID $id not found.")
-                } else {
-                    call.respond(HttpStatusCode.OK, comment.toResponse())
-                }
-            }
-
-            // GET /comments/post/{postId} - Get all comments for a specific post
-            get("/post/{postId}") {
-                val postIdString = call.parameters["postId"]
-                val postId = try {
-                    UUID.fromString(postIdString)
-                } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, "Invalid Post ID format.")
-                    return@get
-                }
-
-                val comments = commentsService.getCommentsByPostId(postId)
-                call.respond(HttpStatusCode.OK, comments.map { it.toResponse() })
-            }
 
             // PUT /comments/{id} - Update an existing comment (only by its author)
             put("/{id}") {
@@ -89,7 +94,7 @@ fun Route.commentsRoute(commentsService: CommentRepository) {
                 }
 
                 val principal = call.principal<JWTPrincipal>()
-                val keycloakId = principal?.payload?.getClaim("keycloakId")?.asString()
+                val keycloakId = principal?.payload?.getClaim("sub")?.asString()
 
                 if (keycloakId == null) {
                     call.respond(HttpStatusCode.Unauthorized, "Missing Keycloak ID in token payload.")
@@ -133,7 +138,7 @@ fun Route.commentsRoute(commentsService: CommentRepository) {
                 }
 
                 val principal = call.principal<JWTPrincipal>()
-                val keycloakId = principal?.payload?.getClaim("keycloakId")?.asString()
+                val keycloakId = principal?.payload?.getClaim("sub")?.asString()
 
                 if (keycloakId == null) {
                     call.respond(HttpStatusCode.Unauthorized, "Missing Keycloak ID in token payload.")

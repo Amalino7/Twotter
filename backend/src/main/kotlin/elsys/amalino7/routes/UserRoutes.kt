@@ -11,10 +11,13 @@ import io.ktor.server.routing.*
 import java.util.*
 
 fun Route.userRoute(userService: UserService) {
-    get("/users") {
-        val users = UserService().getAllUsers()
-        call.respond(users)
+    authenticate("auth-jwt") {
+        get("/users") {
+            val users = UserService().getAllUsers()
+            call.respond(users)
+        }
     }
+
     get("/users/{id}") {
         val userId = call.parameters["id"]!!
         val user = UserService().getUserById(userId)

@@ -23,9 +23,6 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import java.net.URL
 
 val jwtDomain = "http://localhost:7080/realms/KtorAuth"
-val jwtRealm = "KtorAuth"
-val jwkProvider = UrlJwkProvider(URL("$jwtDomain/protocol/openid-connect/certs"))
-
 fun Application.configureSecurity() {
     authentication {
         oauth("keycloakOAuth") {
@@ -44,19 +41,45 @@ fun Application.configureSecurity() {
             }
             client = HttpClient(Apache)
         }
+        val jwtRealm = "KtorAuth"
+        val jwkProvider = UrlJwkProvider(URL("$jwtDomain/protocol/openid-connect/certs"))
         jwt("auth-jwt") {
             realm = jwtRealm
             verifier(jwkProvider, jwtDomain) {
-                withAudience("ktor")
+//                withAudience("ktor")
+                withIssuer(jwtDomain)
             }
             validate { credential ->
-                println("JWT validate triggered: issuer=${credential.payload.issuer}, audience=${credential.payload.audience}")
-                if (credential.payload.audience.contains("ktor")) JWTPrincipal(credential.payload) else null
+                val issuer = credential.payload.issuer
+                val audience = credential.payload.audience
+                val azp = credential.payload.getClaim("azp")?.asString()
+
+                println("JWT validate triggered: issuer=$issuer, audience=$audience, azp=$azp")
+
+                val expectedAudience = "ktor"
+                val expectedAzp = "ktor"
+                val isAudienceValid = true || audience.contains(expectedAudience) // TODO update keycloak
+                val isAzpValid = azp == expectedAzp
+
+                if (isAudienceValid && isAzpValid) {
+                    println("JWT validation successful: Audience and AZP match.")
+                    JWTPrincipal(credential.payload)
+                } else {
+                    println("JWT validation failed:")
+                    if (!isAudienceValid) {
+                        println("  Audience mismatch. Expected '$expectedAudience', got $audience")
+                    }
+                    if (!isAzpValid) {
+                        println("  AZP mismatch. Expected '$expectedAzp', got '$azp'")
+                    }
+                    null
+                }
             }
 
-            challenge { _, _ ->
+            challenge { a1, a2 ->
+                println("JWT challenge triggered: $a1, $a2")
                 println("JWT challenge triggered: issuer=${jwtDomain}, audience=ktor")
-                call.respond(HttpStatusCode.Unauthorized, "Token validation failed")
+                call.respond(HttpStatusCode.Unauthorized, "Token validation failed?!?!")
             }
         }
     }
