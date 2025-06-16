@@ -3,10 +3,10 @@ services:
     type: web
     env: docker
     plan: free
-    dockerContext: .
-    dockerfilePath: Dockerfile
-    envVars:
-      - fromEnvFile: .env
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    #    envVars:
+    #      - fromEnvFile: .env
     ports:
       - 8080
   
@@ -14,10 +14,10 @@ services:
     type: pserv
     plan: free
     env: docker
-    dockerContext: .
+    dockerContext: ./backend
     image: postgres:17
-    envVars:
-      - fromEnvFile: .env
+    #    envVars:
+    #      - fromEnvFile: .env
     volumes:
       - name: postgres_data
         mountPath: /var/lib/postgresql/data
@@ -26,7 +26,7 @@ services:
     type: web
     plan: free
     env: docker
-    dockerContext: .
+    dockerContext: ./backend
     image: quay.io/keycloak/keycloak:24.0
     dockerCommand: >
       start-dev --http-port 7080 --https-port 7443 --import-realm
@@ -49,7 +49,7 @@ services:
         value: true
       - key: KC_EMAIL_SMTP_STARTTLS
         value: true
-      - fromEnvFile: .env
+    #      - fromEnvFile: .env
     volumes:
       - name: keycloak-data
         mountPath: /opt/keycloak/data
