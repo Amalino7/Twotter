@@ -1,0 +1,62 @@
+services:
+  - name: backend
+    type: web
+    env: docker
+    plan: free
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromEnvFile: .env
+    ports:
+      - 8080
+  
+  - name: db
+    type: pserv
+    plan: free
+    env: docker
+    dockerContext: .
+    image: postgres:17
+    envVars:
+      - fromEnvFile: .env
+    volumes:
+      - name: postgres_data
+        mountPath: /var/lib/postgresql/data
+  
+  - name: keycloak
+    type: web
+    plan: free
+    env: docker
+    dockerContext: .
+    image: quay.io/keycloak/keycloak:24.0
+    dockerCommand: >
+      start-dev --http-port 7080 --https-port 7443 --import-realm
+    envVars:
+      - key: KC_HOSTNAME
+        value: your-subdomain.onrender.com
+      - key: KC_HOSTNAME_PORT
+        value: 7080
+      - key: KC_HOSTNAME_STRICT_BACKCHANNEL
+        value: "true"
+      - key: KC_HEALTH_ENABLED
+        value: "true"
+      - key: KC_LOG_LEVEL
+        value: info
+      - key: KC_EMAIL_SMTP_HOST
+        value: smtp.gmail.com
+      - key: KC_EMAIL_SMTP_PORT
+        value: 587
+      - key: KC_EMAIL_SMTP_AUTH
+        value: true
+      - key: KC_EMAIL_SMTP_STARTTLS
+        value: true
+      - fromEnvFile: .env
+    volumes:
+      - name: keycloak-data
+        mountPath: /opt/keycloak/data
+    ports:
+      - 7080
+      - 7443
+
+volumes:
+  - name: postgres_data
+  - name: keycloak-data
