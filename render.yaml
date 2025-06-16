@@ -8,7 +8,7 @@ services:
     envVars:
       - fromEnvFile: .env
     ports:
-      - 8080
+      - port: 8080
   
   - name: db
     type: pserv
@@ -18,7 +18,7 @@ services:
     envVars:
       - fromEnvFile: .env
     volumes:
-      - name: postgres_data
+      - volume: postgres_data
         mountPath: /var/lib/postgresql/data
   
   - name: keycloak
@@ -30,31 +30,31 @@ services:
       start-dev --http-port 7080 --https-port 7443 --import-realm
     envVars:
       - key: KC_HOSTNAME
-        value: your-subdomain.onrender.com # Remember to replace this with your actual Render service URL!
+        value: your-subdomain.onrender.com # replace with actual Render URL
       - key: KC_HOSTNAME_PORT
-        value: 7080
+        value: "7080"
       - key: KC_HOSTNAME_STRICT_BACKCHANNEL
         value: "true"
       - key: KC_HEALTH_ENABLED
         value: "true"
       - key: KC_LOG_LEVEL
-        value: info
+        value: "info"
       - key: KC_EMAIL_SMTP_HOST
-        value: smtp.gmail.com
+        value: "smtp.gmail.com"
       - key: KC_EMAIL_SMTP_PORT
-        value: 587
+        value: "587"
       - key: KC_EMAIL_SMTP_AUTH
-        value: true
+        value: "true"
       - key: KC_EMAIL_SMTP_STARTTLS
-        value: true
+        value: "true"
       - fromEnvFile: .env
     volumes:
-      - name: keycloak-data
+      - volume: keycloak_data
         mountPath: /opt/keycloak/data
     ports:
-      - 7080
-      - 7443
+      - port: 7080
+      - port: 7443
 
 volumes:
   - name: postgres_data
-  - name: keycloak-data
+  - name: keycloak_data
