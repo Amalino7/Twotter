@@ -1,5 +1,6 @@
-import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.alias
+import org.jetbrains.exposed.v1.core.countDistinct
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.javatime.CurrentTimestamp
@@ -67,9 +68,9 @@ object PostAggregates {
     val reposts = Reposts.userId.countDistinct().alias("repost_count")
 }
 
-object hasLiked {
-    val hasLiked = Case()
-        .When((Likes.userId eq null) and (Likes.postId eq Posts.id), booleanLiteral(true))
-        .Else(booleanLiteral(false))
-        .alias("has_liked").alias("has_liked")
-}
+//object hasLiked {
+//    val hasLiked = Case()
+//        .When((Likes.userId eq null) and (Likes.postId eq Posts.id), booleanLiteral(true))
+//        .Else(booleanLiteral(false))
+//        .alias("has_liked").alias("has_liked")
+//}

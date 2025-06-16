@@ -1,7 +1,6 @@
 package elsys.amalino7.plugins
 
 import com.auth0.jwk.UrlJwkProvider
-import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
@@ -22,7 +21,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import java.net.URL
 
-val jwtDomain = "http://localhost:7080/realms/KtorAuth"
+val keycloakDomain: String = System.getenv("KC_DOMAIN")
 fun Application.configureSecurity() {
     authentication {
         oauth("keycloakOAuth") {
@@ -30,11 +29,11 @@ fun Application.configureSecurity() {
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "keycloak",
-                    authorizeUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/auth",
-                    accessTokenUrl = "http://localhost:7080/realms/KtorAuth/protocol/openid-connect/token",
+                    authorizeUrl = "$keycloakDomain/protocol/openid-connect/auth",
+                    accessTokenUrl = "$keycloakDomain/protocol/openid-connect/token",
                     requestMethod = HttpMethod.Post,
                     clientId = "ktor",
-                    clientSecret = dotenv().get("CLIENT_SECRET"),
+                    clientSecret = System.getenv("CLIENT_SECRET"),
                     defaultScopes = listOf("openid", "profile")
 
                 )
@@ -42,12 +41,12 @@ fun Application.configureSecurity() {
             client = HttpClient(Apache)
         }
         val jwtRealm = "KtorAuth"
-        val jwkProvider = UrlJwkProvider(URL("$jwtDomain/protocol/openid-connect/certs"))
+        val jwkProvider = UrlJwkProvider(URL("$keycloakDomain/protocol/openid-connect/certs"))
         jwt("auth-jwt") {
             realm = jwtRealm
-            verifier(jwkProvider, jwtDomain) {
+            verifier(jwkProvider, keycloakDomain) {
 //                withAudience("ktor")
-                withIssuer(jwtDomain)
+                withIssuer(keycloakDomain)
             }
             validate { credential ->
                 val issuer = credential.payload.issuer
@@ -78,7 +77,7 @@ fun Application.configureSecurity() {
 
             challenge { a1, a2 ->
                 println("JWT challenge triggered: $a1, $a2")
-                println("JWT challenge triggered: issuer=${jwtDomain}, audience=ktor")
+                println("JWT challenge triggered: issuer=${keycloakDomain}, audience=ktor")
                 call.respond(HttpStatusCode.Unauthorized, "Token validation failed?!?!")
             }
         }
@@ -141,12 +140,12 @@ fun Application.configureSecurity() {
 
             val httpClient = HttpClient(Apache) {}
             val response: HttpResponse = httpClient.submitForm(
-                url = "$jwtDomain/protocol/openid-connect/token",
+                url = "$keycloakDomain/protocol/openid-connect/token",
                 formParameters = Parameters.build {
                     append("grant_type", "refresh_token")
                     append("refresh_token", refreshToken)
                     append("client_id", "ktor")
-                    append("client_secret", dotenv().get("CLIENT_SECRET"))
+                    append("client_secret", System.getenv("CLIENT_SECRET"))
                 }
             )
 

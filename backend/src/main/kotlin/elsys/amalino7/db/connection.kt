@@ -1,6 +1,5 @@
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.core.Schema
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -9,11 +8,14 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.migration.MigrationUtils
 
 fun Application.connectToDatabase() {
+//    println("jdbc:postgresql://db:5432/" + System.getenv("POSTGRES_DB"))
+
+
     val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:postgresql://localhost:${dotenv().get("POSTGRES_PORT")}/" + dotenv().get("POSTGRES_DB")
+        jdbcUrl = "jdbc:postgresql://db:5432/" + System.getenv("POSTGRES_DB")
         driverClassName = "org.postgresql.Driver"
-        username = dotenv().get("POSTGRES_USER")
-        password = dotenv().get("POSTGRES_PASSWORD")
+        username = System.getenv("POSTGRES_USER")
+        password = System.getenv("POSTGRES_PASSWORD")
         maximumPoolSize = 10
         isAutoCommit = false
         transactionIsolation = "TRANSACTION_REPEATABLE_READ"
