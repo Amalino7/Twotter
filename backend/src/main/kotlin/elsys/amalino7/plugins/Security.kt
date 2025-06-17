@@ -1,6 +1,8 @@
 package elsys.amalino7.plugins
 
 import com.auth0.jwk.UrlJwkProvider
+import elsys.amalino7.domain.services.UserService
+import elsys.amalino7.dto.UserCreateRequest
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
@@ -25,7 +27,7 @@ val keycloakDomain: String = System.getenv("KC_DOMAIN")
 fun Application.configureSecurity() {
     authentication {
         oauth("keycloakOAuth") {
-            urlProvider = { "http://localhost:8080/callback" }
+            urlProvider = { "https://alex.malinovi.com/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "keycloak",
@@ -101,17 +103,28 @@ fun Application.configureSecurity() {
                         }
                     }
                     val res: KeycloakUserInfo =
-                        client.get("http://localhost:7080/realms/KtorAuth/protocol/openid-connect/userinfo")
+                        client.get("$keycloakDomain/protocol/openid-connect/userinfo")
                         {
                             header("Authorization", "Bearer $accessToken")
                         }.body()
+
+                    val user = UserService().getUserByKeycloakId(res.sub)
+                    if (user == null) {
+                        UserService().addUser(
+                            UserCreateRequest(
+                                res.preferred_username,
+                                res.email,
+                                res.sub
+                            )
+                        )
+                    }
 
                     call.response.cookies.append(
                         Cookie(
                             name = "refresh_token",
                             value = principal.refreshToken.toString(),
-//                            httpOnly = true,
-//                            secure = true,
+                            httpOnly = true,
+                            secure = true,
                             path = "/refresh",
                             maxAge = 3600 * 24 * 7,
                         )

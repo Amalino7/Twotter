@@ -12,18 +12,29 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import query
 import java.util.*
 
 class PostRepositoryImpl : PostRepository {
+
+    override suspend fun likePost(userId: UUID, postId: UUID) {
+        query {
+            Likes.insert {
+                it[Likes.postId] = postId
+                it[Likes.userId] = userId
+            }
+        }
+    }
+
     override suspend fun addPost(item: Post): Post {
-        return transaction {
+        return query {
             val postId = Posts.insertAndGetId {
                 it[id] = item.id
                 it[content] = item.content
                 it[imageUrl] = item.imageUrl
                 it[user] = item.user.id
             }
-            return@transaction Posts
+            return@query Posts
                 .join(Users, JoinType.INNER, Comments.userId, Users.id)
                 .selectAll()
                 .where { Posts.id eq postId }
@@ -58,7 +69,7 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override suspend fun getPostById(id: UUID, requesterId: UUID?): Post? {
-        return transaction {
+        return query {
             postQuery(requesterId)
                 .where { Posts.id eq id }
                 .singleOrNull()
@@ -67,7 +78,7 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override suspend fun updatePost(id: UUID, item: Post): Boolean {
-        return transaction {
+        return query {
             Posts.update({ Posts.id eq id }) {
                 it[content] = item.content
             } > 0
@@ -79,7 +90,7 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override suspend fun getAllPosts(requesterId: UUID?): List<Post> {
-        return transaction {
+        return query {
             postQuery()
                 .limit(100)
                 .map {
@@ -94,13 +105,13 @@ class PostRepositoryImpl : PostRepository {
     }
 
     override suspend fun getPostsOfUser(userId: UUID, requesterId: UUID?): List<Post> {
-        return transaction {
+        return query {
             postQuery(requesterId).where { Posts.user eq userId }.map { it.toPost(hasLikedAlias(requesterId)) }
         }
     }
 
     override suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post> {
-        return transaction {
+        return query {
             postQuery(userId).adjustColumnSet {
                 innerJoin(
                     Follows,

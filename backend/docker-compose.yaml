@@ -2,22 +2,24 @@ services:
   backend:
     build: .
     ports:
-      - "8080:8080"
+      - "3004:8080"
     env_file:
       - .env
     depends_on:
       - db
   
   my-keycloak:
-    image: quay.io/keycloak/keycloak:24.0
+    image: docker.io/keycloak/keycloak:26.2.5
     environment:
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 7080
-      KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
+      KC_FRONTEND_URL: "https://keycloak.malinovi.com"
+      KC_HOSTNAME: keycloak.malinovi.com
+      KC_HOSTNAME_STRICT: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HEALTH_ENABLED: "true"
       KC_LOG_LEVEL: info
+      KC_PROXY_ADDRESS_FORWARDING: "true"
+      KC_PROXY_HEADERS: xforwarded
       
       KC_EMAIL_FROM: ${KC_EMAIL}
       KC_EMAIL_FROM_DISPLAY_NAME: "Keycloak Admin"
@@ -36,17 +38,16 @@ services:
       interval: 15s
       timeout: 2s
       retries: 15
-    command: [ "start-dev", "--http-port", "7080", "--https-port", "7443", "--import-realm" ]
+    command: [ "start-dev", "--http-port", "7080", "--import-realm" ]
     ports:
       - "7080:7080"
-      - "7443:7443"
     volumes:
       - ./keycloak-config:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
   #      - ./keycloak-theme/vue-theme:/opt/keycloak/themes/vue-theme
   
   db:
-    image: postgres:17
+    image: postgres:15
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -54,8 +55,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_PORT}:5432"
     env_file:
       - .env
 

@@ -13,6 +13,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.*
 
 private suspend fun getUserId(principal: JWTPrincipal?): String? {
     if (principal == null) {
@@ -107,6 +108,17 @@ fun Route.postRoute(postService: PostService) {
 
             val posts = postService.getPostsOfUserByCriteria(userId = userId)
             call.respond(posts.map { it.toResponse() })
+        }
+
+        post("/posts/{id}/likes") {
+            val id = call.parameters["id"]!!
+            val principal = call.principal<JWTPrincipal>()!!.payload
+            val keycloakID = principal.getClaim("sub").asString()
+            val user = UserService().getUserByKeycloakId(keycloakID)
+            if (keycloakID != user?.id.toString() || user == null) {
+                return@post call.respond(HttpStatusCode.Unauthorized, "User id not match")
+            }
+            postService.postRepo.likePost(user.id, UUID.fromString(id))
         }
     }
 }

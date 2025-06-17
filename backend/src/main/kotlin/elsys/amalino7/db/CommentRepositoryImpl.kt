@@ -12,8 +12,8 @@ import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import query
 import java.util.*
 
 class CommentRepositoryImpl : CommentRepository {
@@ -31,7 +31,7 @@ class CommentRepositoryImpl : CommentRepository {
      */
     override suspend fun addComment(comment: CommentCreateRequest): Comment {
         var newComment: Comment? = null
-        transaction {
+        query {
             val commentId = Comments.insertAndGetId {
                 it[postId] = UUID.fromString(comment.postId)
                 it[userId] = UUID.fromString(comment.userId)
@@ -55,7 +55,7 @@ class CommentRepositoryImpl : CommentRepository {
      * @return The `Comment` object if found, otherwise `null`.
      */
     override suspend fun getCommentById(commentId: Int): Comment? {
-        return transaction {
+        return query {
             Comments.join(Users, JoinType.INNER, Comments.userId, Users.id)
                 .selectAll()
                 .where { Comments.id eq commentId }
@@ -73,7 +73,7 @@ class CommentRepositoryImpl : CommentRepository {
      * @return A `List` of `Comment` objects. Returns an empty list if no comments are found for the post.
      */
     override suspend fun getCommentsByPostId(postId: UUID): List<Comment> {
-        return transaction {
+        return query {
             Comments.join(Users, JoinType.INNER, Comments.userId, Users.id)
                 .selectAll()
                 .where { Comments.postId eq postId }
@@ -90,7 +90,7 @@ class CommentRepositoryImpl : CommentRepository {
      * @return `true` if the comment was successfully updated (i.e., one row was affected), `false` otherwise.
      */
     override suspend fun updateComment(request: CommentUpdateRequest): Boolean {
-        return transaction {
+        return query {
             Comments.update({ Comments.id eq request.id }) {
                 it[content] = request.content
             } > 0
@@ -104,7 +104,7 @@ class CommentRepositoryImpl : CommentRepository {
      * @return `true` if the comment was successfully deleted (i.e., one row was affected), `false` otherwise.
      */
     override suspend fun deleteComment(commentId: Int): Boolean {
-        return transaction {
+        return query {
             Comments.deleteWhere { Comments.id eq commentId } > 0
         }
     }

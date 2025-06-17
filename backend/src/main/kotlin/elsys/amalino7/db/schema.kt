@@ -1,3 +1,5 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.countDistinct
@@ -5,6 +7,7 @@ import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.javatime.CurrentTimestamp
 import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 object Users : UUIDTable("users") {
     val username = text("username").uniqueIndex()
@@ -66,6 +69,14 @@ object PostAggregates {
     val likes = Likes.userId.countDistinct().alias("like_count")
     val comments = Comments.userId.countDistinct().alias("comment_count")
     val reposts = Reposts.userId.countDistinct().alias("repost_count")
+}
+
+suspend fun <T> query(transaction: () -> T): T {
+    return withContext(Dispatchers.IO) {
+        transaction {
+            return@transaction transaction()
+        }
+    }
 }
 
 //object hasLiked {

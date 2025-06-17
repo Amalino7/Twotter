@@ -12,5 +12,6 @@ interface PostRepository {
     suspend fun getAllPosts(requesterId: UUID?): List<Post>
     suspend fun getPostsOfUser(userId: UUID, requesterId: UUID? = null): List<Post>
     suspend fun getPostsOfUserByCriteria(userId: UUID): List<Post>
+    suspend fun likePost(userId: UUID, postId: UUID)
 //    suspend fun findBy(criteria: Map<String, Any>): List<Post>
 }

@@ -9,15 +9,15 @@ import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import query
 import java.util.*
 
 
 class UserRepositoryImpl : UserRepository {
 
     override suspend fun getUserById(id: UUID): User? {
-        return transaction {
+        return query {
             Users.selectAll().where { Users.id eq id }
                 .singleOrNull()?.toUser()
         }
@@ -26,14 +26,14 @@ class UserRepositoryImpl : UserRepository {
 //        override suspend fun getUserByEmail(id: String)
 
     override suspend fun getAllUsers(): List<User> {
-        return transaction {
+        return query {
             Users.selectAll()
                 .map { it.toUser() }
         }
     }
 
     override suspend fun addUser(user: User): User {
-        return transaction {
+        return query {
             Users.insertReturning {
                 it[id] = user.id
                 it[username] = user.name
@@ -46,7 +46,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun updateUser(user: User): Boolean {
-        return transaction {
+        return query {
             Users.update({ Users.id eq user.id }) {
                 it[username] = user.name
                 it[email] = user.email
@@ -57,13 +57,13 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun deleteUserById(id: UUID): Boolean {
-        return transaction {
+        return query {
             Users.deleteWhere { Users.id eq id } > 0
         }
     }
 
     override suspend fun getFollowersById(id: UUID): List<User> {
-        return transaction {
+        return query {
             Follows
                 .join(
                     Users, JoinType.INNER, onColumn = Follows.follower, otherColumn = Users.id
@@ -74,14 +74,14 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun getFollowingById(id: UUID): List<User> {
-        return transaction {
+        return query {
             Follows.selectAll().where { Follows.follower eq id }
                 .map { it.toUser() }
         }
     }
 
     override suspend fun addFollowerForUser(userId: UUID, followerId: UUID): Boolean {
-        return transaction {
+        return query {
             Follows.insertReturning {
                 it[this.follower] = followerId
                 it[this.followee] = userId
@@ -90,7 +90,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun getUserByKeycloakId(keycloakId: String): User? {
-        return transaction {
+        return query {
             Users.selectAll()
                 .where(Users.keycloakId eq keycloakId)
                 .singleOrNull()?.toUser()
@@ -98,7 +98,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
 //    override suspend fun addFollowingForUser(followerId: UUID, followingId: UUID): Boolean {
-//        return transaction {
+//        return query {
 //            Follows.insertReturning {
 //                it[this.follower] = followerId
 //                it[this.followee] = followingId
