@@ -29,22 +29,19 @@ class PostService(
         )
     }
 
-    suspend fun getPostById(id: String, requesterId: String? = null): Post? {
-        return postRepo.getPostById(UUID.fromString(id), requesterId?.let { UUID.fromString(it) })
+    suspend fun getPostById(id: String, requesterId: UUID? = null): Post? {
+        return postRepo.getPostById(UUID.fromString(id), requesterId)
     }
 
     suspend fun deletePostById(id: String) = postRepo.deletePostById(UUID.fromString(id))
-    suspend fun getAllPosts(requestId: String? = null): List<Post> {
-        if (requestId == null) {
-            return postRepo.getAllPosts(null)
-        }
-        return postRepo.getAllPosts(UUID.fromString(requestId))
+    suspend fun getAllPosts(requestId: UUID? = null): List<Post> {
+        return postRepo.getAllPosts(requestId)
     }
 
-    suspend fun getPostsOfUser(userId: String, requesterId: String? = null): List<Post> {
+    suspend fun getPostsOfUser(userId: String, requesterId: UUID? = null): List<Post> {
         if (requesterId == null) {
             return postRepo.getPostsOfUser(UUID.fromString(userId))
-        } else return postRepo.getPostsOfUser(UUID.fromString(userId), UUID.fromString(requesterId))
+        } else return postRepo.getPostsOfUser(UUID.fromString(userId), requesterId)
     }
 
     suspend fun getPostsOfUserByCriteria(userId: String) = postRepo.getPostsOfUserByCriteria(UUID.fromString(userId))

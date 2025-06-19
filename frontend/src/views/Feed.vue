@@ -1,39 +1,85 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
+import { useAuthStore } from '@/stores/auth'; // Adjust the path to your pinia store
 
-const posts = [
-  { text: 'I love to share with yall that i am #vue dev', user: 'trash', url: '' },
-  { text: 'shgksdkg', user: 'meaningful', url: '' },
-  {
-    text: 'sfhfkg',
-    user: 'random',
-    url: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwebneel.com%2Fdaily%2Fsites%2Fdefault%2Ffiles%2Fimages%2Fdaily%2F05-2018%2Fportrait-photography-by-dennis-drozhzhin.jpg&f=1&nofb=1&ipt=84910c2a70dda384d8ce5b2f2cccb404d5a749ca2201c490f1de3312bbfca066',
-  },
-  {
-    text: 'gifghksdfgfdsfskhgfgsdkgdsfghdksfgkdfsgdfksdsgghdksghdskdsfdsgfsddksghkdsj #tripping',
-    user: 'fdsfgjhsfdgjshgfdksdfhsfkhsfsdhshfjkgjsfdgkhfgskda',
-    url: 'https://i.redd.it/1fnxl0er742f1.png',
-  },
-];
+// Define the structure of a post object based on your API response
+interface PostResponse {
+  text: string;
+  user: {
+    username: string; // Assuming the user object has a username
+  };
+  url?: string;
+  createdAt: string; // Or Date, depending on your API
+}
+
+const posts = ref<PostResponse[]>([]);
+const authStore = useAuthStore();
+
+/**
+ * Fetches the user's post feed from the API.
+ */
+async function fetchPosts() {
+  // In a real app, you'd get the user ID from the store or route params
+  const userId = '123';
+
+  if (!authStore.accessToken) {
+    console.error('Authentication token not found.');
+    // You might want to redirect to a login page here
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/users/${userId}/feed`, { // Assuming a proxy is set up for /api
+      headers: {
+        'Authorization': `Bearer ${authStore.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.error('Unauthorized: User ID does not match or token is invalid.');
+        // Handle unauthorized access, e.g., by logging the user out
+        authStore.logout();
+      } else {
+        throw new Error(`Failed to fetch posts with status: ${response.status}`);
+      }
+      return;
+    }
+
+    posts.value = await response.json();
+
+  } catch (error) {
+    console.error('An error occurred while fetching the post feed:', error);
+  }
+}
 
 function randomDate(start: Date, end: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-console.log(randomDate(new Date(2012, 0, 1), new Date()));
+// Fetch the posts when the component is mounted
+onMounted(fetchPosts);
 </script>
 
 <template>
   <main class="flex flex-col m-6 items-center">
-    <Post
-      v-for="post in posts"
-      :text="post.text"
-      :username="post.user"
-      :user-handle="'@' + post.user"
-      :timestamp="randomDate(new Date(2012, 0, 1), new Date())"
-      :image-url="post.url"
-      url="https://www.youtube.com/"
-    >
-    </Post>
+    <div v-if="posts.length > 0">
+      <Post
+        v-for="post in posts"
+        :key="post.id"
+        :text="post.text"
+        :username="post.user.username"
+        :user-handle="'@' + post.user.username"
+        :timestamp="new Date(post.createdAt)"
+        :image-url="post.url"
+        url="https://www.youtube.com/"
+      >
+      </Post>
+    </div>
+    <div v-else>
+      <p>Loading posts or no posts to display.</p>
+    </div>
   </main>
 </template>

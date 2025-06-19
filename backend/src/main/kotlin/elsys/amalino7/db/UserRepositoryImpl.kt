@@ -23,8 +23,6 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-//        override suspend fun getUserByEmail(id: String)
-
     override suspend fun getAllUsers(): List<User> {
         return query {
             Users.selectAll()
@@ -75,7 +73,11 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun getFollowingById(id: UUID): List<User> {
         return query {
-            Follows.selectAll().where { Follows.follower eq id }
+            Follows
+                .join(
+                    Users, JoinType.INNER, onColumn = Follows.followee, otherColumn = Users.id
+                )
+                .selectAll().where { Follows.follower eq id }
                 .map { it.toUser() }
         }
     }
@@ -96,14 +98,5 @@ class UserRepositoryImpl : UserRepository {
                 .singleOrNull()?.toUser()
         }
     }
-
-//    override suspend fun addFollowingForUser(followerId: UUID, followingId: UUID): Boolean {
-//        return query {
-//            Follows.insertReturning {
-//                it[this.follower] = followerId
-//                it[this.followee] = followingId
-//            }.singleOrNull() != null
-//        }
-//    }
 
 }

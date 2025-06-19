@@ -21,9 +21,12 @@ fun Application.configureRouting() {
             println(cause.printStackTrace())
         }
     }
+
+    val userService = UserService(userRepository = UserRepositoryImpl())
+    val postService = PostService(PostRepositoryImpl(), UserRepositoryImpl())
     routing {
-        userRoute(userService = UserService())
-        postRoute(postService = PostService(PostRepositoryImpl(), UserRepositoryImpl()))
+        userRoute(userService = userService)
+        postRoute(postService = postService, userService = userService)
         commentsRoute(commentsService = CommentRepositoryImpl())
     }
 }

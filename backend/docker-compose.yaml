@@ -11,15 +11,16 @@ services:
   my-keycloak:
     image: docker.io/keycloak/keycloak:26.2.5
     environment:
-      KC_FRONTEND_URL: "https://keycloak.malinovi.com"
-      KC_HOSTNAME: keycloak.malinovi.com
-      KC_HOSTNAME_STRICT: "true"
+      #      KC_FRONTEND_URL: "https://keycloak.malinovi.com"
+      KC_HOSTNAME: localhost
+      #      KC_HOSTNAME_STRICT: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HEALTH_ENABLED: "true"
       KC_LOG_LEVEL: info
-      KC_PROXY_ADDRESS_FORWARDING: "true"
-      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_PORT: 7080
+      #      KC_PROXY_ADDRESS_FORWARDING: "true"
+      #      KC_PROXY_HEADERS: xforwarded
       
       KC_EMAIL_FROM: ${KC_EMAIL}
       KC_EMAIL_FROM_DISPLAY_NAME: "Keycloak Admin"
@@ -47,12 +48,14 @@ services:
   #      - ./keycloak-theme/vue-theme:/opt/keycloak/themes/vue-theme
   
   db:
-    image: postgres:15
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGRES_PORT}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:

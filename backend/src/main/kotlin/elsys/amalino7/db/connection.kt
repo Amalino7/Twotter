@@ -6,19 +6,23 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.migration.MigrationUtils
+import java.util.concurrent.TimeUnit
 
 fun Application.connectToDatabase() {
-//    println("jdbc:postgresql://db:5432/" + System.getenv("POSTGRES_DB"))
-
-
+    val dbConfig = environment.config.config("ktor.db")
+    println("Connecting to database at ${dbConfig.property("url").getString()}")
     val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:postgresql://db:5432/" + System.getenv("POSTGRES_DB")
-        driverClassName = "org.postgresql.Driver"
-        username = System.getenv("POSTGRES_USER")
-        password = System.getenv("POSTGRES_PASSWORD")
-        maximumPoolSize = 10
-        isAutoCommit = false
-        transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+        jdbcUrl = dbConfig.property("url").getString()
+        driverClassName = dbConfig.property("driver").getString()
+        username = dbConfig.property("user").getString()
+        password = dbConfig.property("password").getString()
+        maximumPoolSize = dbConfig.property("maxPoolSize").getString().toInt()
+        isAutoCommit = dbConfig.property("autoCommit").getString().toBoolean()
+//        transactionIsolation = dbConfig.property("transactionIsolation").getString()
+        maxLifetime = TimeUnit.MINUTES.toMillis(55) // Slightly less than any infrastructure timeout
+        idleTimeout = TimeUnit.MINUTES.toMillis(10)
+        connectionTestQuery = "SELECT 1"
+        keepaliveTime = TimeUnit.MINUTES.toMillis(5)
     }
 
     val dataSource = HikariDataSource(config)
@@ -33,6 +37,5 @@ fun Application.connectToDatabase() {
             Users, Posts, Follows, Likes, Comments, Reposts
         )
         res.forEach(::exec)
-        println(res)
     }
 }

@@ -4,44 +4,29 @@ const apiURL = 'http://localhost:3000/';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    token: null,
+    accessToken: null as string | null,
   }),
+  getters: {
+    /**
+     * Checks if a user is authenticated.
+     * @returns True if the access token exists, false otherwise.
+     */
+    isAuthenticated: (state) => !!state.accessToken,
+  },
   actions: {
-    async login(username: string, password: string) {
-      const res = await fetch(`/${apiURL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include', // this sends the cookie
-      });
-
-      if (!res.ok) throw new Error('Login failed');
-
-      const data = await res.json();
-      this.token = data.accessToken;
-      this.user = data.user;
+    /**
+     * Sets the access token in the state.
+     * @param token The access token to store.
+     */
+    setAccessToken(token: string) {
+      this.accessToken = token;
     },
-
+    /**
+     * Clears the access token from the state, effectively logging the user out.
+     */
     logout() {
-      this.token = null;
-      this.user = null;
-      // Tell the backend to destroy the refresh token cookie
-      fetch('/${apiURL}/logout', { method: 'POST', credentials: 'include' });
-    },
-
-    async fetchUser() {
-      if (!this.token) return;
-
-      const res = await fetch('/${apiURL}/me', {
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
-
-      if (res.ok) {
-        this.user = await res.json();
-      } else {
-        this.logout(); // Or try token refresh
-      }
+      this.accessToken = null;
     },
   },
 });
+

@@ -11,16 +11,14 @@ import io.ktor.server.routing.*
 import java.util.*
 
 fun Route.userRoute(userService: UserService) {
-    authenticate("auth-jwt") {
-        get("/users") {
-            val users = UserService().getAllUsers()
-            call.respond(users)
-        }
+    get("/users") {
+        val users = userService.getAllUsers()
+        call.respond(users)
     }
 
     get("/users/{id}") {
         val userId = call.parameters["id"]!!
-        val user = UserService().getUserById(userId)
+        val user = userService.getUserById(userId)
         if (user == null) {
             call.respond(HttpStatusCode.NotFound)
             return@get
@@ -30,7 +28,7 @@ fun Route.userRoute(userService: UserService) {
     post("/users/{id}/followers") {
         val userId = call.parameters["id"]!!
         val followerId = call.receive<FollowerCreateRequest>()
-        UserRepositoryImpl().addFollowerForUser(
+        userService.addFollowerForUser(
             userId = UUID.fromString(userId),
             followerId = UUID.fromString(followerId.userId)
         )
@@ -48,14 +46,14 @@ fun Route.userRoute(userService: UserService) {
     authenticate("auth-jwt") {
         post("/users") {
             val userDto = call.receive<UserCreateRequest>()
-            val user = UserService().addUser(userDto)
+            val user = userService.addUser(userDto)
             call.respond(user)
         }
     }
 
     delete("/users/{id}") {
         val userId = call.parameters["id"]!!
-        val isDeleted = UserService().deleteUser(userId)
+        val isDeleted = userService.deleteUser(userId)
         if (isDeleted) {
             call.respond(HttpStatusCode.OK)
         } else {
