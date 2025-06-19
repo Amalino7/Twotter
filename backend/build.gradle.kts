@@ -27,6 +27,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-openapi")
     implementation("io.ktor:ktor-server-auth")
+    implementation("net.datafaker:datafaker:2.3.0")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-apache")
     implementation("io.ktor:ktor-server-auth-jwt")

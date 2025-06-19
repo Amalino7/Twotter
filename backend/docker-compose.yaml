@@ -35,11 +35,11 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:7080/health/ready" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/ready" ]
       interval: 15s
       timeout: 2s
       retries: 15
-    command: [ "start-dev", "--http-port", "7080", "--import-realm" ]
+    command: [ "start-dev", "--http-port", "7080", "--import-realm", "--verbose" ]
     ports:
       - "7080:7080"
     volumes:

@@ -41,12 +41,10 @@ object Follows : Table("follows") {
 }
 
 object Likes : Table() {
-    val userId = reference("user_id", Users).uniqueIndex()
-    val postId = uuid("post_id").references(Posts.id).uniqueIndex()
+    val userId = reference("user_id", Users).index()
+    val postId = uuid("post_id").references(Posts.id).index()
 
-    init {
-        index(true, userId, postId) // Unique combo
-    }
+    override val primaryKey = PrimaryKey(userId, postId)
 }
 
 object Comments : IntIdTable("comments") {

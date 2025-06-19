@@ -1,10 +1,9 @@
-package elsys.amalino7.plugins.security
+package elsys.amalino7.security
 
 import elsys.amalino7.domain.services.UserService
 import elsys.amalino7.dto.KeycloakUserInfo
 import elsys.amalino7.dto.TokenResponse
 import elsys.amalino7.dto.UserCreateRequest
-import elsys.amalino7.security.SecurityConfig
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -50,7 +49,8 @@ fun Routing.authRouting(config: SecurityConfig, httpClient: HttpClient, userServ
                 parameters.append("access_token", principal.accessToken)
             }.buildString()
 
-            call.respondRedirect(redirectUrl)
+            call.respond(principal.accessToken)
+//            call.respondRedirect(redirectUrl)
         }
     }
 

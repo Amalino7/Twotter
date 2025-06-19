@@ -2,7 +2,7 @@ package elsys.amalino7.plugins
 
 import elsys.amalino7.db.UserRepositoryImpl
 import elsys.amalino7.domain.services.UserService
-import elsys.amalino7.plugins.security.authRouting
+import elsys.amalino7.security.authRouting
 import elsys.amalino7.security.customJwt
 import elsys.amalino7.security.customOauth
 import elsys.amalino7.security.toSecurityConfig
