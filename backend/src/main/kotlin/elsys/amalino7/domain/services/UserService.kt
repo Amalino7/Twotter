@@ -2,6 +2,7 @@ package elsys.amalino7.domain.services
 
 import elsys.amalino7.domain.repositories.UserRepository
 import elsys.amalino7.dto.UserCreateRequest
+import elsys.amalino7.dto.UserPatchRequest
 import elsys.amalino7.dto.toResponse
 import elsys.amalino7.dto.toUser
 import java.util.*
@@ -29,4 +30,11 @@ class UserService(private val userRepository: UserRepository) {
 
     suspend fun addFollowerForUser(userId: UUID, followerId: UUID) =
         userRepository.addFollowerForUser(userId, followerId)
+
+    suspend fun removeFollowerForUser(userId: String, followerId: String) {
+        userRepository.deleteFollowerForUser(UUID.fromString(userId), UUID.fromString(followerId))
+    }
+
+    suspend fun patchUser(userId: UUID, patchRequest: UserPatchRequest) =
+        userRepository.updateUser(userId, patchRequest)
 }

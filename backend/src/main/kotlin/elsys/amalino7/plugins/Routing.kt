@@ -6,6 +6,7 @@ import elsys.amalino7.db.UserRepositoryImpl
 import elsys.amalino7.domain.services.PostService
 import elsys.amalino7.domain.services.UserService
 import elsys.amalino7.routes.commentsRoute
+import elsys.amalino7.routes.imageRoutes
 import elsys.amalino7.routes.postRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -25,6 +26,7 @@ fun Application.configureRouting() {
     val userService = UserService(userRepository = UserRepositoryImpl())
     val postService = PostService(PostRepositoryImpl(), UserRepositoryImpl())
     routing {
+        imageRoutes()
         userRoute(userService = userService)
         postRoute(postService = postService, userService = userService)
         commentsRoute(commentsService = CommentRepositoryImpl())

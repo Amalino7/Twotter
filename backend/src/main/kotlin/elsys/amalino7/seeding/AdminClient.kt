@@ -17,6 +17,7 @@ data class KeycloakUser(
     val username: String,
     val email: String,
     val enabled: Boolean = true,
+    val emailVerified: Boolean = true,
     val credentials: List<Credential> = emptyList()
 )
 
@@ -65,6 +66,26 @@ class KeycloakAdminClient(private val config: KeycloakConfig) {
         }
         // Keycloak returns the user's ID in the Location header
         return response.headers[HttpHeaders.Location]?.substringAfterLast("/")
+    }
+
+    @Serializable
+    data class KeycloakUserUpdate(
+        val emailVerified: Boolean,
+        val enabled: Boolean
+    )
+
+    suspend fun updateUserAttributes(userId: String, emailVerified: Boolean, enabled: Boolean) {
+        val token = getAdminAccessToken()
+        val updateBody = KeycloakUserUpdate(emailVerified = emailVerified, enabled = enabled)
+        val response = client.put("${config.serverUrl.dropLast(16)}/admin/realms/${config.realm}/users/$userId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(updateBody)
+        }
+        if (!response.status.isSuccess()) {
+            println("Failed to update user $userId: ${response.status}")
+            // You might want to throw an exception or handle the error appropriately
+        }
     }
 }
 

@@ -52,9 +52,13 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-migration:$exposed_version")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.postgresql:postgresql:42.7.2")
+
+    // serialization
     implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
 
+    // S3
+    implementation("io.minio:minio:8.5.2")
 
     // tests
     testImplementation("io.ktor:ktor-server-test-host")

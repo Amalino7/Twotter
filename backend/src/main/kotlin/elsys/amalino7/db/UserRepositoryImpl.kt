@@ -4,13 +4,16 @@ import Follows
 import Users
 import elsys.amalino7.domain.model.User
 import elsys.amalino7.domain.repositories.UserRepository
+import elsys.amalino7.dto.UserPatchRequest
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import query
+import java.time.Instant
 import java.util.*
 
 
@@ -97,6 +100,26 @@ class UserRepositoryImpl : UserRepository {
                 .where(Users.keycloakId eq keycloakId)
                 .singleOrNull()?.toUser()
         }
+    }
+
+    override suspend fun deleteFollowerForUser(userId: UUID, followerId: UUID): Boolean {
+        return query {
+            Follows.deleteWhere { (follower eq followerId) and (followee eq userId) } > 0
+        }
+    }
+
+    override suspend fun updateUser(id: UUID, userPatch: UserPatchRequest): User? = query {
+        val rowsAffected = Users.update {
+            userPatch.name?.let { name -> it[username] = name }
+            userPatch.email?.let { email -> it[Users.email] = email }
+            userPatch.bio?.let { bio -> it[Users.bio] = bio }
+            userPatch.displayName?.let { displayName -> it[Users.displayName] = displayName }
+            it[updatedAt] = Instant.now() // Update timestamp
+        }
+        if (rowsAffected > 0) {
+            return@query Users.selectAll().where { Users.id eq id }.single().toUser()
+        } else return@query null
+
     }
 
 }

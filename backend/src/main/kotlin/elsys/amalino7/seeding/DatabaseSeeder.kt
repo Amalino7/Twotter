@@ -40,6 +40,7 @@ object DatabaseSeeder {
                 val userToCreate = KeycloakUser(
                     username = username,
                     email = faker.internet().emailAddress(username),
+                    emailVerified = true,
                     enabled = true,
                     credentials = listOf(Credential(value = "password123"))
                 )
@@ -47,6 +48,7 @@ object DatabaseSeeder {
                 val keycloakId = runBlocking { keycloakAdminClient.createUser(userToCreate) }
 
                 if (keycloakId != null) {
+                    runBlocking { keycloakAdminClient.updateUserAttributes(keycloakId, true, enabled = true) }
                     Users.insert {
                         it[this.username] = userToCreate.username
                         it[email] = userToCreate.email

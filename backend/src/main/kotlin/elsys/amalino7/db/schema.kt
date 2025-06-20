@@ -63,6 +63,16 @@ object Reposts : Table("reposts") {
 }
 
 
+object Images : Table() {
+    val id = integer("id").autoIncrement()
+    val originalFileName = varchar("original_file_name", 255)
+    val minioObjectKey = varchar("minio_object_key", 255).uniqueIndex()
+    val contentType = varchar("content_type", 100)
+    val uploadTimestamp = timestamp("upload_time").defaultExpression(CurrentTimestamp)
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object PostAggregates {
     val likes = Likes.userId.countDistinct().alias("like_count")
     val comments = Comments.userId.countDistinct().alias("comment_count")

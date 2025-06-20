@@ -5,8 +5,8 @@ export async function authFetch(input: RequestInfo, init: RequestInit = {}) {
 
   const makeRequest = async () => {
     const headers = init.headers ? new Headers(init.headers) : new Headers();
-    if (auth.token) {
-      headers.set('Authorization', `Bearer ${auth.token}`);
+    if (auth.accessToken) {
+      headers.set('Authorization', `Bearer ${auth.accessToken}`);
     }
 
     return fetch(input, {
@@ -27,7 +27,7 @@ export async function authFetch(input: RequestInfo, init: RequestInit = {}) {
 
     if (refreshRes.ok) {
       const data = await refreshRes.json();
-      auth.token = data.accessToken;
+      auth.accessToken = data.accessToken;
 
       // Retry original request
       response = await makeRequest();

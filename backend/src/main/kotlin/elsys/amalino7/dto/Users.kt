@@ -36,7 +36,11 @@ fun UserCreateRequest.toUser() = User(
 @Serializable
 data class FollowerCreateRequest(val userId: String)
 
-
-
-
+@Serializable
+data class UserPatchRequest(
+    val name: String? = null,
+    val email: String? = null,
+    val bio: String? = null,
+    val displayName: String? = null
+)
 
