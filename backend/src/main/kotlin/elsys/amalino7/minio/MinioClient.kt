@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
+import io.minio.SetBucketPolicyArgs
 import java.io.InputStream
 
 //object MinioClient {
@@ -12,6 +13,17 @@ import java.io.InputStream
 
 private const val BUCKET_NAME = "images" // Your bucket name
 
+private const val policyJson = """{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Effect":"Allow",
+         "Principal":"*",
+         "Action":["s3:GetObject"],
+         "Resource":["arn:aws:s3:::${BUCKET_NAME}*"]
+      }
+   ]
+}"""
 
 object MinioClientInstance {
     var minioClient: MinioClient? = null
@@ -22,15 +34,30 @@ object MinioClientInstance {
             .credentials(
                 config.property("access_key").getString(),
                 config.property("secret_key").getString()
-            ) // Your Minio access and secret keysz
+            ) // Your Minio access and secret keys
             .build()
         url = config.property("url").getString()
     }
 
     fun uploadImage(objectName: String, inputStream: InputStream, contentType: String) {
         // Ensure the bucket exists
-        if (!minioClient!!.bucketExists(io.minio.BucketExistsArgs.builder().bucket(BUCKET_NAME).build())) {
+        if (!minioClient!!.bucketExists(
+                io.minio.BucketExistsArgs.builder()
+                    .bucket(BUCKET_NAME)
+                    .build()
+            )
+        ) {
+            println("Creating bucket")
             minioClient!!.makeBucket(io.minio.MakeBucketArgs.builder().bucket(BUCKET_NAME).build())
+            minioClient!!.setBucketPolicy(
+                SetBucketPolicyArgs
+                    .builder()
+                    .bucket(BUCKET_NAME)
+                    .config(policyJson)
+                    .build()
+            )
+        } else {
+            println("Bucket already exists")
         }
 
         minioClient!!.putObject(

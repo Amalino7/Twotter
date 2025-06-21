@@ -12,6 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 object Users : UUIDTable("users") {
     val username = text("username").uniqueIndex()
     val keycloakId = text("keycloak_id").uniqueIndex()
+    val profileImageId = reference("profile_image_id", Images.id).nullable()
     val email = text("email").uniqueIndex()
     val displayName = text("display_name").nullable()
     val bio = text("bio").nullable()
@@ -24,7 +25,8 @@ object Users : UUIDTable("users") {
 object Posts : UUIDTable("posts") {
     val user = reference("user_id", Users)
     val content = text("content")
-    val imageUrl = text("image_url").nullable()
+    val imageId = reference("image_id", Images.id).nullable().uniqueIndex()
+    val originalPost = reference("original_post_id", Posts).nullable()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
     val updatedAt = timestamp("updated_at")
 //        .withDefinition("UPDATE", CurrentTimestamp)
@@ -51,32 +53,31 @@ object Comments : IntIdTable("comments") {
     val postId = reference("post_id", Posts).index()
     val userId = reference("user_id", Users).index()
     val content = text("content")
+    val parentCommentId = reference("parent_id", Comments).nullable()
     val timestamp = timestamp("created_at").defaultExpression(CurrentTimestamp)
 }
 
-object Reposts : Table("reposts") {
-    val userId = reference("user_id", Users).index()
-    val postId = reference("post_id", Posts).index()
-    val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
+//object Reposts : Table("reposts") {
+//    val userId = reference("user_id", Users).index()
+//    val postId = reference("post_id", Posts).index()
+//    val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
+//
+//    override val primaryKey = PrimaryKey(userId, postId)
+//}
 
-    override val primaryKey = PrimaryKey(userId, postId)
-}
 
-
-object Images : Table() {
-    val id = integer("id").autoIncrement()
+object Images : UUIDTable() {
+    val uploaderId = reference("uploader_id", Users).nullable() // TODO fix
     val originalFileName = varchar("original_file_name", 255)
     val minioObjectKey = varchar("minio_object_key", 255).uniqueIndex()
     val contentType = varchar("content_type", 100)
     val uploadTimestamp = timestamp("upload_time").defaultExpression(CurrentTimestamp)
-
-    override val primaryKey = PrimaryKey(id)
 }
 
 object PostAggregates {
     val likes = Likes.userId.countDistinct().alias("like_count")
     val comments = Comments.userId.countDistinct().alias("comment_count")
-    val reposts = Reposts.userId.countDistinct().alias("repost_count")
+//    val reposts = Reposts.userId.countDistinct().alias("repost_count")
 }
 
 suspend fun <T> query(transaction: () -> T): T {

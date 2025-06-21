@@ -14,7 +14,7 @@ data class PostResponse(
     val hasLiked: Boolean,
     val likesCount: Long,
     val commentsCount: Long,
-    val repostsCount: Long,
+//    val repostsCount: Long,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -22,7 +22,7 @@ data class PostResponse(
 @Serializable
 data class PostCreateRequest(
     val content: String,
-    val imageUrl: String? = null,
+    val imageId: String? = null,
     val userId: String
 )
 
@@ -36,7 +36,7 @@ fun Post.toResponse() =
         hasLiked,
         likeCount,
         commentCount,
-        repostCount,
+//        repostCount,
         createdAt!!,
         updatedAt!!
     )

@@ -2,9 +2,9 @@ package elsys.amalino7.db
 
 import Comments
 import Follows
+import Images
 import Likes
 import Posts
-import Reposts
 import Users
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.repositories.PostRepository
@@ -31,7 +31,8 @@ class PostRepositoryImpl : PostRepository {
             val postId = Posts.insertAndGetId {
                 it[id] = item.id
                 it[content] = item.content
-                it[imageUrl] = item.imageUrl
+                item.imageId?.let { imgId -> it[imageId] = imgId }
+//                it[imageUrl] = item.imageUrl
                 it[user] = item.user.id
             }
             return@query Posts
@@ -57,15 +58,16 @@ class PostRepositoryImpl : PostRepository {
             .join(Users, JoinType.INNER, Posts.user, Users.id)
             .join(Likes, JoinType.LEFT, additionalConstraint = { Posts.id eq Likes.postId })
             .join(Comments, JoinType.LEFT, additionalConstraint = { Posts.id eq Comments.postId })
-            .join(Reposts, JoinType.LEFT, additionalConstraint = { Posts.id eq Reposts.postId })
+            .join(Images, JoinType.LEFT, Posts.imageId, Images.id)
+//            .join(Reposts, JoinType.LEFT, additionalConstraint = { Posts.id eq Reposts.postId })
             .select(
                 Posts.columns + Users.columns
                         + Likes.userId.countDistinct().alias("like_count")
                         + Comments.userId.countDistinct().alias("comment_count")
-                        + Reposts.userId.countDistinct().alias("repost_count")
+//                        + Reposts.userId.countDistinct().alias("repost_count")
                         + hasLikedAlias
             )
-            .groupBy(Posts.id, Users.id, Likes.userId, Likes.postId)
+            .groupBy(Posts.id, Users.id, Likes.userId, Likes.postId, Images.id)
     }
 
     override suspend fun getPostById(id: UUID, requesterId: UUID?): Post? {

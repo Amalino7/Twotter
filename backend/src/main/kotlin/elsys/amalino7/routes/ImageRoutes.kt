@@ -41,17 +41,19 @@ fun Route.imageRoutes() {
                     MinioClientInstance.uploadImage(minioObjectKey, fileBytes!!.inputStream(), contentType)
 
                     // Save metadata to database
-                    var imageUrl = ""
+                    val imageUrl = MinioClientInstance.getImageUrl(minioObjectKey)
                     query {
                         Images.insert {
                             it[Images.originalFileName] = originalFileName
                             it[Images.minioObjectKey] = minioObjectKey
                             it[Images.contentType] = contentType
                         }
-                        imageUrl = MinioClientInstance.getImageUrl(minioObjectKey)
                     }
 
-                    call.respond(HttpStatusCode.Created, mapOf("imageUrl" to imageUrl))
+                    call.respond(
+                        HttpStatusCode.Created,
+                        mapOf("imageUrl" to imageUrl, "minioObjectKey" to minioObjectKey)
+                    )
                 } catch (e: Exception) {
                     e.printStackTrace()
                     call.respond(HttpStatusCode.InternalServerError, "Failed to upload image: ${e.message}")

@@ -4,10 +4,8 @@ import elsys.amalino7.seeding.KeycloakConfig
 import elsys.amalino7.seeding.KeycloakUser
 import kotlinx.coroutines.runBlocking
 import net.datafaker.Faker
-import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.Instant
 import java.util.*
@@ -73,7 +71,7 @@ object DatabaseSeeder {
                     val postId = Posts.insert {
                         it[user] = UUID.fromString(userId.toString())
                         it[content] = contentGenerators.random().invoke()
-                        it[imageUrl] = faker.internet().image()
+//                        it[imageUrl] = faker.internet().image()
                         it[updatedAt] = Instant.now()
                     }[Posts.id].value
                     postIds.add(postId)
@@ -104,19 +102,19 @@ object DatabaseSeeder {
             }
 
             // Create Reposts
-            postIds.shuffled().take(postIds.size / 2).forEach { postId ->
-                val reposter = userIds.random()
-                // Simple check to avoid primary key collision, though DB would prevent it
-                if (Reposts.selectAll()
-                        .where { (Reposts.userId eq reposter) and (Reposts.postId eq postId) }
-                        .count() == 0L
-                ) {
-                    Reposts.insert {
-                        it[userId] = UUID.fromString(reposter.toString())
-                        it[this.postId] = postId
-                    }
-                }
-            }
+//            postIds.shuffled().take(postIds.size / 2).forEach { postId ->
+//                val reposter = userIds.random()
+//                // Simple check to avoid primary key collision, though DB would prevent it
+//                if (Reposts.selectAll()
+//                        .where { (Reposts.userId eq reposter) and (Reposts.postId eq postId) }
+//                        .count() == 0L
+//                ) {
+//                    Reposts.insert {
+//                        it[userId] = UUID.fromString(reposter.toString())
+//                        it[this.postId] = postId
+//                    }
+//                }
+//            }
 
             // Create Comments
             postIds.shuffled().take(postIds.size / 2).forEach { postId ->

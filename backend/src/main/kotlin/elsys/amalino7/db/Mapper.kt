@@ -1,12 +1,14 @@
 package elsys.amalino7.db
 
 import Comments
+import Images
 import PostAggregates
 import Posts
 import Users
 import elsys.amalino7.domain.model.Comment
 import elsys.amalino7.domain.model.Post
 import elsys.amalino7.domain.model.User
+import elsys.amalino7.minio.MinioClientInstance
 import kotlinx.datetime.toKotlinInstant
 import org.jetbrains.exposed.v1.core.ExpressionWithColumnTypeAlias
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -35,7 +37,9 @@ fun ResultRow.toPost(hasLiked: ExpressionWithColumnTypeAlias<Boolean>): Post {
         updatedAt = this[Posts.updatedAt].toKotlinInstant(),
         likeCount = this.getOrNull(PostAggregates.likes) ?: 0,
         commentCount = this.getOrNull(PostAggregates.comments) ?: 0,
-        repostCount = this.getOrNull(PostAggregates.reposts) ?: 0,
+        imageUrl = this.getOrNull(Images.minioObjectKey)?.let { MinioClientInstance.getImageUrl(it) },
+        imageId = this.getOrNull(Images.id)?.let { UUID.fromString(it.toString()) },
+//        repostCount = this.getOrNull(PostAggregates.reposts) ?: 0,
         hasLiked = this.getOrNull(hasLiked) ?: false,
     )
 }

@@ -16,7 +16,7 @@ fun Route.postRoute(postService: PostService, userService: UserService) {
 
     authenticate("auth-jwt", optional = true) {
         get("/posts") {
-            val user = call.principal<User>();
+            val user = call.principal<User>()
             val PostDTOs = postService.getAllPosts(user?.id).map { it.toResponse() }
             call.respond(PostDTOs)
         }
@@ -43,6 +43,7 @@ fun Route.postRoute(postService: PostService, userService: UserService) {
             val returnedPost = postService.createPost(post, user)
             return@post call.respond(HttpStatusCode.Created, returnedPost)
         }
+
         delete("/posts/{id}") {
             val id = call.parameters["id"]!!
             val userId = call.principal<User>()!!.id.toString()
@@ -66,7 +67,7 @@ fun Route.postRoute(postService: PostService, userService: UserService) {
         }
         get("/users/{id}/feed") {
             val userId = call.parameters["id"]!!
-            val user = call.principal<User>()!!.id.toString();
+            val user = call.principal<User>()!!.id.toString()
             if (user != userId) {
                 call.respond(HttpStatusCode.Unauthorized, "User id not match")
             }
