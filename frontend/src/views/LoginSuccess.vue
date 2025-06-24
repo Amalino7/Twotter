@@ -7,12 +7,16 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-onMounted(() => {
+onMounted(async () => {
   const accessToken = route.query.access_token as string | null;
 
   if (accessToken) {
     authStore.setAccessToken(accessToken);
     console.log('Successfully stored access token.');
+
+    // Fetch the user's data before redirecting
+    await authStore.fetchUser();
+
     router.replace({ name: 'home' });
   } else {
     console.error('Login failed: No access token found in the redirect URL.');

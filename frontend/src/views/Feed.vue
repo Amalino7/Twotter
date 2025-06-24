@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
-import { useAuthStore } from '@/stores/auth'; // Adjust the path to your pinia store
+import { apiURL, useAuthStore } from '@/stores/auth'; // Adjust the path to your pinia store
 
 // Define the structure of a post object based on your API response
 interface PostResponse {
-  text: string;
-  user: {
-    username: string; // Assuming the user object has a username
-  };
-  url?: string;
+  id: string;
+  content: string;
+  userHandle: string;
   createdAt: string; // Or Date, depending on your API
+  updatedAt: string;
+  imageUrl?: string;
+  userDisplayName: string;
+  hasLiked: boolean;
+  likesCount: number;
+  commentsCount: number;
+  repostsCount: number;
 }
 
 const posts = ref<PostResponse[]>([]);
@@ -20,18 +25,14 @@ const authStore = useAuthStore();
  * Fetches the user's post feed from the API.
  */
 async function fetchPosts() {
-  // In a real app, you'd get the user ID from the store or route params
-  const userId = '123';
 
   if (!authStore.accessToken) {
     console.error('Authentication token not found.');
-    // You might want to redirect to a login page here
     return;
   }
 
   try {
-    const response = await fetch(`/api/users/${userId}/feed`, {
-      // Assuming a proxy is set up for /api
+    const response = await fetch(`${apiURL}users/${authStore.user?.id}/feed`, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',
@@ -65,12 +66,15 @@ onMounted(fetchPosts);
       <Post
         v-for="post in posts"
         :key="post.id"
-        :text="post.text"
-        :username="post.user.username"
-        :user-handle="'@' + post.user.username"
+        :text="post.content"
+        :username="post.userDisplayName"
+        :user-handle="post.userHandle"
         :timestamp="new Date(post.createdAt)"
-        :image-url="post.url"
-        url="https://www.youtube.com/"
+        :image-url="post.imageUrl"
+        :likes-count="post.likesCount"
+        :comments-count="post.commentsCount"
+        :reposts-count="post.repostsCount"
+        :has-liked="post.hasLiked"
       >
       </Post>
     </div>

@@ -92,7 +92,9 @@ import { computed, ref } from 'vue';
 import data from 'emoji-mart-vue-fast/data/twitter.json';
 import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import { useAuthStore, apiURL } from '@/stores/auth';
 
+const authStore = useAuthStore();
 const emojiIndex = new EmojiIndex(data);
 const newTwott = ref('');
 const postStatus = ref('');
@@ -129,18 +131,37 @@ const handleMediaUpload = (event) => {
 };
 
 const submitTwott = async () => {
+  if (!authStore.isAuthenticated || !authStore.user) {
+    postStatus.value = 'You must be logged in to post.';
+    setTimeout(() => (postStatus.value = ''), 3000);
+    return;
+  }
+
   try {
-    // Simulate a network request
-    await new Promise((resolve, reject) =>
-      setTimeout(() => (Math.random() > 0.1 ? resolve() : reject()), 1000),
-    );
+    const response = await fetch(`${apiURL}posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+      body: JSON.stringify({
+        content: newTwott.value,
+        userId: authStore.user.id,
+      }),
+    });
+
+    if (response.status !== 201) {
+      throw new Error('Failed to post twott.');
+    }
+
     newTwott.value = '';
     charCount.value = 0;
     mediaFiles.value = [];
     mediaPreviews.value = [];
     if (mediaInput.value) mediaInput.value.value = null;
     postStatus.value = 'Twott posted!';
-  } catch {
+  } catch (error) {
+    console.error(error);
     postStatus.value = 'Something went wrong.';
   } finally {
     setTimeout(() => (postStatus.value = ''), 3000);

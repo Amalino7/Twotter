@@ -16,15 +16,18 @@ import io.ktor.server.routing.*
 import userRoute
 
 fun Application.configureRouting() {
+    val userService = UserService(userRepository = UserRepositoryImpl())
+    val postService = PostService(PostRepositoryImpl(), UserRepositoryImpl())
     install(StatusPages) {
+        exception<IllegalArgumentException> { call, cause ->
+            call.respondText(text = "Invalid endpoint argument", status = HttpStatusCode.BadRequest)
+        }
         exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+            call.respondText(text = "500: Server imploded :(((", status = HttpStatusCode.InternalServerError)
             println(cause.printStackTrace())
         }
     }
 
-    val userService = UserService(userRepository = UserRepositoryImpl())
-    val postService = PostService(PostRepositoryImpl(), UserRepositoryImpl())
     routing {
         imageRoutes()
         userRoute(userService = userService)

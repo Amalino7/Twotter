@@ -3,14 +3,22 @@ import ShareButton from './ShareButton.vue';
 import RetweetIcon from '../icons/RetweetIcon.vue';
 import CommentIcon from '../icons/CommentIcon.vue';
 import convertToTwitterDate from '@/utils/twitterDate.js';
-import { ref } from 'vue';
 import SocialButton from './SocialButton.vue';
 import BetterImage from '@/components/BetterImage.vue';
 import TextFormat from '@/components/Utility/TextFormat.vue';
 
-const props = defineProps(['username', 'userHandle', 'text', 'timestamp', 'imageUrl', 'url']);
-
-const likeCount = ref(0);
+const props = defineProps([
+  'username',
+  'userHandle',
+  'text',
+  'timestamp',
+  'imageUrl',
+  'url',
+  'likesCount',
+  'hasLiked',
+  'commentsCount',
+  'repostsCount',
+]);
 
 const twitterDate = convertToTwitterDate(props.timestamp);
 </script>
@@ -43,14 +51,14 @@ const twitterDate = convertToTwitterDate(props.timestamp);
       <div class="mt-4 flex justify-between">
         <button class="text-gray-400 hover:text-blue-400 flex items-center">
           <CommentIcon />
-          <span class="ml-1">{{ 0 }}</span>
+          <span class="ml-1">{{ commentsCount }}</span>
         </button>
         <button class="text-gray-400 hover:text-green-400 flex items-center">
           <RetweetIcon />
-          <span class="ml-1">{{ 0 }}</span>
+          <span class="ml-1">{{ repostsCount }}</span>
         </button>
 
-        <SocialButton v-model="likeCount" />
+        <SocialButton :has-liked="hasLiked"  :model-value="likesCount"/>
         <ShareButton :url="url"></ShareButton>
       </div>
     </div>

@@ -36,7 +36,7 @@ class PostRepositoryImpl : PostRepository {
                 it[user] = item.user.id
             }
             return@query Posts
-                .join(Users, JoinType.INNER, Comments.userId, Users.id)
+                .join(Users, JoinType.INNER, Posts.user, Users.id)
                 .selectAll()
                 .where { Posts.id eq postId }
                 .single().toPost(hasLikedAlias(item.user.id))

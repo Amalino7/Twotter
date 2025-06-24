@@ -1,6 +1,109 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import { useAuthStore, apiURL, type User } from '@/stores/auth';
+import Post from '@/components/PostComponents/Post.vue';
+import LoginPage from '@/views/LoginPage.vue';
+
+interface PostResponse {
+  id: string;
+  content: string;
+  userHandle: string;
+  createdAt: string;
+  updatedAt: string;
+  imageUrl?: string;
+  userDisplayName: string;
+  hasLiked: boolean;
+  likesCount: number;
+  commentsCount: number;
+  repostsCount: number;
+}
+
+const authStore = useAuthStore();
+const user = computed<User | null>(() => authStore.user);
+const userPosts = ref<PostResponse[]>([]);
+
+const isOwnProfile = ref(true);
+const isFollowing = ref(false);
+const isEditing = ref(false);
+const editStatus = ref('');
+
+const editableDisplayName = ref('');
+const editableUsername = ref('');
+const editableBio = ref('');
+
+/**
+ * Fetches the user's own posts from the API.
+ */
+async function fetchUserPosts() {
+  if (!authStore.accessToken || !user.value) {
+    console.error('Authentication token or user data not found.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${apiURL}users/${user.value.id}/posts`, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user posts with status: ${response.status}`);
+    }
+
+    userPosts.value = await response.json();
+  } catch (error) {
+    console.error('An error occurred while fetching user posts:', error);
+  }
+}
+
+onMounted(() => {
+  if (user.value) {
+    fetchUserPosts();
+  }
+});
+
+const startEdit = () => {
+  if (!user.value) return;
+  editableDisplayName.value = user.value.displayName;
+  editableUsername.value = user.value.name;
+  editableBio.value = user.value.bio;
+  isEditing.value = true;
+};
+
+const cancelEdit = () => {
+  isEditing.value = false;
+  editStatus.value = 'Edit canceled';
+  setTimeout(() => (editStatus.value = ''), 1500);
+};
+
+const saveProfile = async () => {
+  if (!user.value) return;
+
+
+  const updatedUser: User = {
+    ...user.value,
+    displayName: editableDisplayName.value,
+    name: editableUsername.value,
+    bio: editableBio.value,
+  };
+  authStore.user = updatedUser;
+
+  isEditing.value = false;
+  editStatus.value = 'Saved successfully';
+  setTimeout(() => (editStatus.value = ''), 1500);
+
+  // TODO put logic
+};
+
+const toggleFollow = () => {
+  isFollowing.value = !isFollowing.value;
+};
+</script>
+
 <template>
-  <LoginPage></LoginPage>
-  <div class="min-h-screen bg-gray-900 text-white">
+  <div v-if="user" class="min-h-screen bg-gray-900 text-white">
     <div class="max-w-4xl mx-auto p-4">
       <!-- User Info -->
       <div class="flex items-center justify-between mb-6">
@@ -14,17 +117,17 @@
             <transition name="fade" mode="out-in">
               <div v-if="isEditing" key="edit">
                 <input
-                  v-model="editableUsername"
+                  v-model="editableDisplayName"
                   class="bg-gray-800 text-white p-1 rounded mb-1 block transition-all duration-700"
                 />
                 <input
-                  v-model="editableFullName"
+                  v-model="editableUsername"
                   class="bg-gray-800 text-white p-1 rounded block transition-all duration-700"
                 />
               </div>
               <div v-else key="view">
-                <h1 class="text-2xl font-bold">@{{ username }}</h1>
-                <p class="text-gray-400">{{ fullName }}</p>
+                <h1 class="text-2xl font-bold">{{ user.displayName }}</h1>
+                <p class="text-gray-400">@{{ user.name }}</p>
               </div>
             </transition>
           </div>
@@ -33,7 +136,7 @@
           <template v-if="isOwnProfile">
             <button
               v-if="!isEditing"
-              @click="isEditing = true"
+              @click="startEdit"
               class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-xl shadow"
             >
               Edit Profile
@@ -61,8 +164,7 @@
               }"
             >
               <span v-if="editStatus === 'Saved successfully'"> ✅ </span>
-              <span v-else-if="editStatus === 'Edit canceled'"> ❌ </span>
-              <span v-else-if="editStatus === 'Save failed'"> ⚠️ </span>
+              <span v-else> ❌ </span>
               {{ editStatus }}
             </p>
           </template>
@@ -91,7 +193,7 @@
                 class="w-full bg-gray-800 text-white p-2 rounded transition-all duration-700"
               ></textarea>
             </div>
-            <p v-else class="mb-2">{{ bio }}</p>
+            <p v-else class="mb-2">{{ user.bio }}</p>
           </div>
         </transition>
         <div class="flex space-x-4 text-sm text-gray-400">
@@ -100,85 +202,34 @@
         </div>
       </div>
 
-      <!-- Tweets -->
-      <!--      <div class="space-y-4">-->
-      <!--        <div v-for="tweet in tweets" :key="tweet.id" class="bg-gray-800 p-4 rounded-xl shadow">-->
-      <!--          <p>{{ tweet.content }}</p>-->
-      <!--          <div class="text-sm text-gray-500 mt-2">{{ tweet.timestamp }}</div>-->
-      <!--        </div>-->
-      <!--      </div>-->
-
-      <Feed></Feed>
+      <!-- User's Posts -->
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold border-b border-gray-700 pb-2">My Posts</h2>
+        <div v-if="userPosts.length > 0">
+          <Post
+            v-for="post in userPosts"
+            :key="post.id"
+            :text="post.content"
+            :username="post.userDisplayName"
+            :user-handle="post.userHandle"
+            :timestamp="new Date(post.createdAt)"
+            :image-url="post.imageUrl"
+            :likes-count="post.likesCount"
+            :comments-count="post.commentsCount"
+            :reposts-count="post.repostsCount"
+            :has-liked="post.hasLiked"
+          />
+        </div>
+        <div v-else>
+          <p>No posts to display yet.</p>
+        </div>
+      </div>
     </div>
   </div>
+  <div v-else class="flex justify-center items-center min-h-screen text-white">
+    <LoginPage></LoginPage>
+  </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import Feed from '@/views/Feed.vue';
-import LoginPage from '@/views/LoginPage.vue';
-
-const isOwnProfile = ref(true);
-const isFollowing = ref(false);
-const isEditing = ref(false);
-
-const username = ref('username');
-const fullName = ref('Full Name');
-const bio = ref('This is a sample user bio. It can include interests, occupation, and more.');
-
-const editableUsername = ref(username.value);
-const editableFullName = ref(fullName.value);
-const editableBio = ref(bio.value);
-const editStatus = ref('');
-
-// const tweets = [
-//   {
-//     id: 1,
-//     content: "Just setting up my twttr clone! #vue #tailwind",
-//     timestamp: "May 22, 2025",
-//   },
-//   {
-//     id: 2,
-//     content: "Loving the dark mode on this new app ✨",
-//     timestamp: "May 21, 2025",
-//   },
-// ];
-
-const toggleFollow = () => {
-  isFollowing.value = !isFollowing.value;
-};
-
-const simulateSaveRequest = () => {
-  return new Promise((resolve, reject) => {
-    const success = Math.random() > 0.2;
-    setTimeout(() => (success ? resolve() : reject()), 800);
-  });
-};
-
-const saveProfile = async () => {
-  try {
-    await simulateSaveRequest();
-    username.value = editableUsername.value;
-    fullName.value = editableFullName.value;
-    bio.value = editableBio.value;
-    isEditing.value = false;
-    editStatus.value = 'Saved successfully';
-  } catch {
-    editStatus.value = 'Save failed';
-  } finally {
-    setTimeout(() => (editStatus.value = ''), 1500);
-  }
-};
-
-const cancelEdit = () => {
-  editableUsername.value = username.value;
-  editableFullName.value = fullName.value;
-  editableBio.value = bio.value;
-  isEditing.value = false;
-  editStatus.value = 'Edit canceled';
-  setTimeout(() => (editStatus.value = ''), 1500);
-};
-</script>
 
 <style scoped>
 .follow-button {

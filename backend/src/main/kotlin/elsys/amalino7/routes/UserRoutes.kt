@@ -2,6 +2,7 @@ import elsys.amalino7.domain.model.User
 import elsys.amalino7.domain.services.UserService
 import elsys.amalino7.dto.UserCreateRequest
 import elsys.amalino7.dto.UserPatchRequest
+import elsys.amalino7.dto.toResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -27,6 +28,12 @@ fun Route.userRoute(userService: UserService) {
     }
 
     authenticate("auth-jwt") {
+        get("/users/me") {
+            val user = call.principal<User>()!!
+            val userDto = user.toResponse();
+            call.respond(userDto)
+        }
+
         post("/users") {
             val userDto = call.receive<UserCreateRequest>()
             val user = userService.addUser(userDto)
