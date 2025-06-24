@@ -39,7 +39,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages")
     implementation("io.ktor:ktor-server-netty")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("io.ktor:ktor-server-config-yaml")
+//    implementation("io.ktor:ktor-server-config-yaml")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     implementation("io.ktor:ktor-client-cio-jvm:3.1.3")
     implementation("io.ktor:ktor-client-encoding:3.1.3")
