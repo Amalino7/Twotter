@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // This could be an environment variable
-const backendLoginUrl = 'http://localhost:3004/login';
+import { apiURL } from '@/stores/auth.ts';
+
+const backendLoginUrl = `${apiURL}login`;
 </script>
 
 <template>

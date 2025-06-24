@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const apiURL = 'http://localhost:3000/';
+export const apiURL = 'http://localhost:8080/';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -29,4 +29,3 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 });
-

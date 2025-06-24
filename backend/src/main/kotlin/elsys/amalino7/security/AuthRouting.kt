@@ -49,8 +49,8 @@ fun Routing.authRouting(config: SecurityConfig, httpClient: HttpClient, userServ
                 parameters.append("access_token", principal.accessToken)
             }.buildString()
 
-            call.respond(principal.accessToken)
-//            call.respondRedirect(redirectUrl)
+//            call.respond(principal.accessToken)
+            call.respondRedirect(redirectUrl)
         }
     }
 

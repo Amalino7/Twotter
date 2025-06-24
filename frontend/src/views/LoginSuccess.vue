@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-onMounted(() => {``
-  const accessToken = route.query.accessToken as string | null;
+onMounted(() => {
+  const accessToken = route.query.access_token as string | null;
 
   if (accessToken) {
     authStore.setAccessToken(accessToken);
     console.log('Successfully stored access token.');
-    router.replace({ name: 'PostFeed' });
+    router.replace({ name: 'home' });
   } else {
     console.error('Login failed: No access token found in the redirect URL.');
     router.replace({ name: 'Login' });

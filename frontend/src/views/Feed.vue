@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
 import { useAuthStore } from '@/stores/auth'; // Adjust the path to your pinia store
 
@@ -30,9 +30,10 @@ async function fetchPosts() {
   }
 
   try {
-    const response = await fetch(`/api/users/${userId}/feed`, { // Assuming a proxy is set up for /api
+    const response = await fetch(`/api/users/${userId}/feed`, {
+      // Assuming a proxy is set up for /api
       headers: {
-        'Authorization': `Bearer ${authStore.accessToken}`,
+        Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -49,14 +50,9 @@ async function fetchPosts() {
     }
 
     posts.value = await response.json();
-
   } catch (error) {
     console.error('An error occurred while fetching the post feed:', error);
   }
-}
-
-function randomDate(start: Date, end: Date) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
 // Fetch the posts when the component is mounted
