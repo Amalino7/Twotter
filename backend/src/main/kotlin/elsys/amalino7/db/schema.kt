@@ -1,5 +1,3 @@
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.countDistinct
@@ -81,10 +79,8 @@ object PostAggregates {
 }
 
 suspend fun <T> query(transaction: () -> T): T {
-    return withContext(Dispatchers.IO) {
-        transaction {
-            return@transaction transaction()
-        }
+    return transaction {
+        transaction()
     }
 }
 

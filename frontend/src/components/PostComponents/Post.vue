@@ -8,6 +8,7 @@ import BetterImage from '@/components/BetterImage.vue';
 import TextFormat from '@/components/Utility/TextFormat.vue';
 
 const props = defineProps([
+  'userId',
   'username',
   'userHandle',
   'text',
@@ -31,9 +32,11 @@ const twitterDate = convertToTwitterDate(props.timestamp);
       <div class="flex items-center">
         <img alt="User Avatar" class="h-10 w-10 rounded-full" src="https://placehold.co/400" />
         <div class="ml-3">
-          <p class="text-sm font-medium text-white truncate">{{ username }}</p>
+          <router-link :to="`/user/${userId}`" class="hover:underline">
+            <p class="text-sm font-medium text-white truncate">{{ username }}</p>
+          </router-link>
           <div class="flex items-center">
-            <p class="text-sm text-gray-400 truncate">{{ userHandle }}</p>
+            <p class="text-sm text-gray-400 truncate">@{{ userHandle }}</p>
             <p class="text-sm text-gray-400 ml-2 truncate">{{ twitterDate }}</p>
           </div>
         </div>
@@ -58,7 +61,7 @@ const twitterDate = convertToTwitterDate(props.timestamp);
           <span class="ml-1">{{ repostsCount }}</span>
         </button>
 
-        <SocialButton :has-liked="hasLiked"  :model-value="likesCount"/>
+        <SocialButton :has-liked="hasLiked" :model-value="likesCount" />
         <ShareButton :url="url"></ShareButton>
       </div>
     </div>

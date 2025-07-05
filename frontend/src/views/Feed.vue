@@ -1,22 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
-import { apiURL, useAuthStore } from '@/stores/auth'; // Adjust the path to your pinia store
-
-// Define the structure of a post object based on your API response
-interface PostResponse {
-  id: string;
-  content: string;
-  userHandle: string;
-  createdAt: string; // Or Date, depending on your API
-  updatedAt: string;
-  imageUrl?: string;
-  userDisplayName: string;
-  hasLiked: boolean;
-  likesCount: number;
-  commentsCount: number;
-  repostsCount: number;
-}
+import { apiURL, useAuthStore } from '@/stores/auth';
+import { PostResponse } from '@/types/dtos.ts';
 
 const posts = ref<PostResponse[]>([]);
 const authStore = useAuthStore();
@@ -25,7 +11,6 @@ const authStore = useAuthStore();
  * Fetches the user's post feed from the API.
  */
 async function fetchPosts() {
-
   if (!authStore.accessToken) {
     console.error('Authentication token not found.');
     return;
@@ -66,6 +51,7 @@ onMounted(fetchPosts);
       <Post
         v-for="post in posts"
         :key="post.id"
+        :user-id="post.userId"
         :text="post.content"
         :username="post.userDisplayName"
         :user-handle="post.userHandle"

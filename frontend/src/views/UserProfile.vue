@@ -1,74 +1,51 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useAuthStore, apiURL, type User } from '@/stores/auth';
+import { computed, onMounted, ref } from 'vue';
+import { apiURL, useAuthStore, type User } from '@/stores/auth';
 import Post from '@/components/PostComponents/Post.vue';
 import LoginPage from '@/views/LoginPage.vue';
-
-interface PostResponse {
-  id: string;
-  content: string;
-  userHandle: string;
-  createdAt: string;
-  updatedAt: string;
-  imageUrl?: string;
-  userDisplayName: string;
-  hasLiked: boolean;
-  likesCount: number;
-  commentsCount: number;
-  repostsCount: number;
-}
+import type { PostResponse } from '@/types/dtos.ts';
+import { useRoute } from 'vue-router';
 
 const authStore = useAuthStore();
-const user = computed<User | null>(() => authStore.user);
 const userPosts = ref<PostResponse[]>([]);
 
-const isOwnProfile = ref(true);
+const route = useRoute();
 const isFollowing = ref(false);
 const isEditing = ref(false);
 const editStatus = ref('');
+const profileUser = ref<User | null>(null);
 
 const editableDisplayName = ref('');
 const editableUsername = ref('');
 const editableBio = ref('');
 
+const isOwnProfile = computed(() => {
+  return route.params.handle === 'me' || route.params.handle === authStore.user?.id;
+});
+
 /**
  * Fetches the user's own posts from the API.
  */
-async function fetchUserPosts() {
-  if (!authStore.accessToken || !user.value) {
-    console.error('Authentication token or user data not found.');
-    return;
-  }
 
-  try {
-    const response = await fetch(`${apiURL}users/${user.value.id}/posts`, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user posts with status: ${response.status}`);
+onMounted(async () => {
+  if (!isOwnProfile.value) {
+    await fetchUserProfile(route.params.handle as string);
+    if (profileUser.value) {
+      await fetchUserPosts(profileUser.value.id);
     }
-
-    userPosts.value = await response.json();
-  } catch (error) {
-    console.error('An error occurred while fetching user posts:', error);
-  }
-}
-
-onMounted(() => {
-  if (user.value) {
-    fetchUserPosts();
+  } else {
+    profileUser.value = authStore.user;
+    if (profileUser.value) {
+      await fetchUserPosts(profileUser.value.id);
+    }
   }
 });
 
 const startEdit = () => {
-  if (!user.value) return;
-  editableDisplayName.value = user.value.displayName;
-  editableUsername.value = user.value.name;
-  editableBio.value = user.value.bio;
+  if (!profileUser.value) return;
+  editableDisplayName.value = profileUser.value.displayName;
+  editableUsername.value = profileUser.value.name;
+  editableBio.value = profileUser.value.bio;
   isEditing.value = true;
 };
 
@@ -79,11 +56,10 @@ const cancelEdit = () => {
 };
 
 const saveProfile = async () => {
-  if (!user.value) return;
-
+  if (!profileUser.value) return;
 
   const updatedUser: User = {
-    ...user.value,
+    ...profileUser.value,
     displayName: editableDisplayName.value,
     name: editableUsername.value,
     bio: editableBio.value,
@@ -100,10 +76,72 @@ const saveProfile = async () => {
 const toggleFollow = () => {
   isFollowing.value = !isFollowing.value;
 };
+
+async function fetchUserProfile(handle: string) {
+  if (!authStore.accessToken) {
+    console.error('Authentication token not found.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${apiURL}users/${handle}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user profile with status: ${response.status}`);
+    }
+
+    profileUser.value = await response.json();
+  } catch (error) {
+    console.error('An error occurred while fetching user profile:', error);
+  }
+}
+
+async function fetchUserPosts(userId: string) {
+  if (!authStore.accessToken) {
+    console.error('Authentication token not found.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${apiURL}users/${userId}/posts`, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user posts with status: ${response.status}`);
+    }
+
+    userPosts.value = await response.json();
+  } catch (error) {
+    console.error('An error occurred while fetching user posts:', error);
+  }
+}
+
+onMounted(async () => {
+  if (route.params.handle) {
+    // Viewing someone else's profile
+    await fetchUserProfile(route.params.handle as string);
+    if (profileUser.value) {
+      await fetchUserPosts(profileUser.value.id);
+    }
+  } else if (profileUser.value) {
+    // Viewing own profile
+    profileUser.value = profileUser.value;
+    await fetchUserPosts(profileUser.value.id);
+  }
+});
 </script>
 
 <template>
-  <div v-if="user" class="min-h-screen bg-gray-900 text-white">
+  <div v-if="profileUser" class="min-h-screen bg-gray-900 text-white">
     <div class="max-w-4xl mx-auto p-4">
       <!-- User Info -->
       <div class="flex items-center justify-between mb-6">
@@ -126,8 +164,8 @@ const toggleFollow = () => {
                 />
               </div>
               <div v-else key="view">
-                <h1 class="text-2xl font-bold">{{ user.displayName }}</h1>
-                <p class="text-gray-400">@{{ user.name }}</p>
+                <h1 class="text-2xl font-bold">{{ profileUser.displayName }}</h1>
+                <p class="text-gray-400">@{{ profileUser.name }}</p>
               </div>
             </transition>
           </div>
@@ -185,15 +223,15 @@ const toggleFollow = () => {
       <!-- Bio and Stats -->
       <div class="mb-6">
         <transition name="fade" mode="out-in">
-          <div :key="isEditing">
+          <div>
             <div v-if="isEditing">
               <textarea
                 v-model="editableBio"
                 rows="3"
-                class="w-full bg-gray-800 text-white p-2 rounded transition-all duration-700"
+                class="w-full bg-gray-800 text-white p-2 rounded"
               ></textarea>
             </div>
-            <p v-else class="mb-2">{{ user.bio }}</p>
+            <p v-else class="mb-2">{{ profileUser?.bio }}</p>
           </div>
         </transition>
         <div class="flex space-x-4 text-sm text-gray-400">
@@ -204,7 +242,9 @@ const toggleFollow = () => {
 
       <!-- User's Posts -->
       <div class="space-y-4">
-        <h2 class="text-xl font-bold border-b border-gray-700 pb-2">My Posts</h2>
+        <h2 class="text-xl font-bold border-b border-gray-700 pb-2">
+          {{ isOwnProfile ? 'My Posts' : `${profileUser?.displayName}'s Posts` }}
+        </h2>
         <div v-if="userPosts.length > 0">
           <Post
             v-for="post in userPosts"

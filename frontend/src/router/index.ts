@@ -27,11 +27,8 @@ const router = createRouter({
       component: LoginSuccess,
     },
     {
-      path: '/user/me',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
+      path: '/user/:handle',
+      name: 'userProfile',
       component: () => import('../views/UserProfile.vue'),
     },
     {
