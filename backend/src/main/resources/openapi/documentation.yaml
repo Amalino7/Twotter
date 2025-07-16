@@ -1,1035 +1,445 @@
-openapi: 3.0.0
+openapi: "3.1.0"
 info:
-  title: backend API Copy
-  version: 1.0.0
-  description: backend API
+  title: "amalino7 API"
+  description: "amalino7 API"
+  version: "1.0.0"
 servers:
-  - url: '{{baseUrl}}'
+  - url: "https://amalino7"
+  - url: "http://localhost:8080"
 paths:
-  /comments/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    delete:
-      summary: DELETE /comments/{id} - Delete a comment
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '204':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: object
-        '400':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-        '403':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Forbidden
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
+  /post/{postId}/comments:
     get:
-      summary: >-
-        --- PUBLIC ENDPOINTS --- // <br> GET /comments/{id} - Get a single
-        comment by its ID
+      description: ""
       parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
+        - name: "postId"
+          in: "path"
+          required: true
           schema:
-            type: string
+            type: "string"
       responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+        "200":
+          description: "OK"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: object
-                properties:
-                  postId:
-                    type: string
-                  content:
-                    type: string
-                  id:
-                    type: integer
-        '400':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
-    put:
-      summary: PUT /comments/{id} - Update an existing comment
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/CommentResponse"
+    post:
+      description: ""
       parameters:
-        - name: Content-Type
-          in: header
-          required: false
-          example: application/json
+        - name: "postId"
+          in: "path"
+          required: true
           schema:
-            type: string
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-        '400':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-        '403':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Forbidden
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
+            type: "string"
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                id:
-                  type: integer
-  /comments:
-    parameters: [ ]
-    post:
-      summary: POST /comments - Add a new comment
-      parameters:
-        - name: Content-Type
-          in: header
-          required: false
-          example: application/json
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '201':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  postId:
-                    type: string
-                  content:
-                    type: string
-                  id:
-                    type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                postId:
-                  type: string
-                userId:
-                  type: string
-                content:
-                  type: string
-  /comments/post/{postId}:
-    parameters:
-      - name: postId
-        in: path
+              $ref: "#/components/schemas/CommentCreateRequest"
         required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    get:
-      summary: GET /comments/post/{postId} - Get all comments for a specific post
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
       responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+        "404":
+          description: "Not Found"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    postId:
-                      type: string
-                    content:
-                      type: string
-                    id:
-                      type: integer
-        '400':
-          headers:
-            Content-Type:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-  /posts/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
+                $ref: "#/components/schemas/CommentResponse"
+  /post/{postId}/comments/{id}:
     delete:
-      summary: /posts/:id
+      description: ""
       parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
+        - name: "id"
+          in: "path"
+          required: true
           schema:
-            type: string
+            type: "string"
+        - name: "postId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
       responses:
-        '200':
-          headers:
-            Content-Type:
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
               schema:
-                type: string
-              example: '*/*'
-          description: OK
-        '401':
-          headers:
-            Content-Type:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: Unauthorized
-        '404':
-          headers:
-            Content-Type:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: Not Found
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
     get:
-      summary: /posts/:id
+      description: ""
       parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
+        - name: "id"
+          in: "path"
+          required: true
           schema:
-            type: string
+            type: "string"
+        - name: "postId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
       responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+        "404":
+          description: "Not Found"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: object
-  /posts/{id}/likes:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    post:
-      summary: /posts/:id/likes
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '401':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Unauthorized
-  /posts:
-    parameters: [ ]
-    get:
-      summary: /posts
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+        "409":
+          description: "Conflict"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    content:
-                      type: string
-                    userHandle:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    imageUrl:
-                      type: string
-                    userDisplayName:
-                      type: string
-                    hasLiked:
-                      type: boolean
-                    likesCount:
-                      type: integer
-                    commentsCount:
-                      type: integer
-                    repostsCount:
-                      type: integer
-    post:
-      summary: /posts
-      parameters:
-        - name: Content-Type
-          in: header
-          required: false
-          example: application/json
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '201':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Created
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: object
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                userId:
-                  type: string
-                imageUrl:
-                  type: string
-  /users/{id}/followers:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    delete:
-      summary: /users/:id/followers
-      parameters: [ ]
-      responses: { }
-    get:
-      summary: /users/:id/followers
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    email:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    keycloakId:
-                      type: string
-                    bio:
-                      type: string
-                    displayName:
-                      type: string
-    post:
-      summary: /users/:id/followers
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-  /users/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    delete:
-      summary: /users/:id
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-    get:
-      summary: /users/:id
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  email:
-                    type: string
-                  createdAt:
-                    type: object
-                  updatedAt:
-                    type: object
-                  keycloakId:
-                    type: string
-                  bio:
-                    type: string
-                  displayName:
-                    type: string
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
+                $ref: "#/components/schemas/CommentResponse"
     patch:
-      summary: /users/:id
+      description: ""
       parameters:
-        - name: Content-Type
-          in: header
-          required: false
-          example: application/json
+        - name: "id"
+          in: "path"
+          required: true
           schema:
-            type: string
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
+            type: "string"
+        - name: "postId"
+          in: "path"
+          required: true
           schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  keycloakId:
-                    type: string
-                  name:
-                    type: string
-                  email:
-                    type: string
-                  createdAt:
-                    type: object
-                  updatedAt:
-                    type: object
-                  bio:
-                    type: string
-                  displayName:
-                    type: string
-        '400':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-        '404':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Not Found
+            type: "string"
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                bio:
-                  type: string
-                displayName:
-                  type: string
-  /users/{id}/feed:
-    parameters:
-      - name: id
-        in: path
+              $ref: "#/components/schemas/CommentUpdateRequest"
         required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    get:
-      summary: /users/:id/feed
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
       responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+        "500":
+          description: "Internal Server Error"
           content:
-            application/json:
+            text/plain:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    content:
-                      type: string
-                    userHandle:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    imageUrl:
-                      type: string
-                    userDisplayName:
-                      type: string
-                    hasLiked:
-                      type: boolean
-                    likesCount:
-                      type: integer
-                    commentsCount:
-                      type: integer
-                    repostsCount:
-                      type: integer
-        '401':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Unauthorized
-  /users/{id}/following:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    get:
-      summary: /users/:id/following
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "409":
+          description: "Conflict"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    email:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    keycloakId:
-                      type: string
-                    bio:
-                      type: string
-                    displayName:
-                      type: string
-  /users/{id}/posts:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: '(Required) '
-        example: tempor est ullamco mollit
-        schema:
-          type: string
-    get:
-      summary: /users/:id/posts
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "401":
+          description: "Unauthorized"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    content:
-                      type: string
-                    userHandle:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    imageUrl:
-                      type: string
-                    userDisplayName:
-                      type: string
-                    hasLiked:
-                      type: boolean
-                    likesCount:
-                      type: integer
-                    commentsCount:
-                      type: integer
-                    repostsCount:
-                      type: integer
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
   /users:
-    parameters: [ ]
     get:
-      summary: /users
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
+      description: ""
       responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
+        "200":
+          description: "OK"
           content:
-            application/json:
+            '*/*':
               schema:
-                type: array
+                type: "array"
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    email:
-                      type: string
-                    createdAt:
-                      type: object
-                    updatedAt:
-                      type: object
-                    keycloakId:
-                      type: string
-                    bio:
-                      type: string
-                    displayName:
-                      type: string
+                  $ref: "#/components/schemas/UserResponse"
     post:
-      summary: /users
-      parameters:
-        - name: Content-Type
-          in: header
-          required: false
-          example: application/json
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  email:
-                    type: string
-                  createdAt:
-                    type: object
-                  updatedAt:
-                    type: object
-                  keycloakId:
-                    type: string
-                  bio:
-                    type: string
-                  displayName:
-                    type: string
+      description: ""
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                keycloakId:
-                  type: string
-  /auth/callback:
-    parameters: [ ]
+              $ref: "#/components/schemas/UserCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserCreateRequest"
+  /users/{id}:
+    delete:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "204":
+          description: "No Content"
+          content:
+            '*/*':
+              schema:
+                type: "object"
     get:
-      summary: /auth/callback
+      description: ""
       parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
+        - name: "id"
+          in: "path"
+          required: true
           schema:
-            type: string
+            type: "string"
       responses:
-        '200':
-          headers:
-            Content-Type:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: OK
-        '401':
-          headers:
-            Content-Type:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: Unauthorized
-  /auth/login:
-    parameters: [ ]
+                type: "object"
+    patch:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPatchRequest"
+        required: true
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+  /users/me:
     get:
-      summary: /auth/login
-      parameters: [ ]
-      responses: { }
-  /auth/logout:
-    parameters: [ ]
-    post:
-      summary: /auth/logout
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
+      description: ""
       responses:
-        '200':
-          headers:
-            Content-Type:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
               schema:
-                type: string
-              example: '*/*'
-          description: OK
-  /auth/refresh:
-    parameters: [ ]
-    post:
-      summary: /auth/refresh
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '200':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: OK
-        '401':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Unauthorized
-  /images/upload:
-    parameters: [ ]
-    post:
-      summary: /images/upload
-      parameters:
-        - name: Accept
-          in: header
-          required: false
-          example: '*/*'
-          schema:
-            type: string
-      responses:
-        '201':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Created
-        '400':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Bad Request
-        '500':
-          headers:
-            Content-Type:
-              schema:
-                type: string
-              example: '*/*'
-          description: Internal Server Error
+                $ref: "#/components/schemas/User"
+components:
+  schemas:
+    CommentResponse:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        postId:
+          type: "string"
+        content:
+          type: "string"
+      required:
+        - "id"
+        - "postId"
+        - "content"
+    CommentCreateRequest:
+      type: "object"
+      properties:
+        content:
+          type: "string"
+      required:
+        - "content"
+    CommentUpdateRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        content:
+          type: "string"
+          nullable: true
+      required:
+        - "id"
+    UserResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        bio:
+          type: "string"
+          nullable: true
+        displayName:
+          type: "string"
+          nullable: true
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+        keycloakId:
+          type: "string"
+      required:
+        - "id"
+        - "name"
+        - "email"
+        - "createdAt"
+        - "updatedAt"
+        - "keycloakId"
+    UserCreateRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+        keycloakId:
+          type: "string"
+      required:
+        - "name"
+        - "email"
+        - "keycloakId"
+    UserPatchRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          nullable: true
+        email:
+          type: "string"
+          nullable: true
+        bio:
+          type: "string"
+          nullable: true
+        displayName:
+          type: "string"
+          nullable: true
+    Uuid:
+      type: "object"
+      properties:
+        mostSignificantBits:
+          type: "integer"
+          format: "int64"
+        leastSignificantBits:
+          type: "integer"
+          format: "int64"
+      required:
+        - "mostSignificantBits"
+        - "leastSignificantBits"
+    User:
+      type: "object"
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        keycloakId:
+          type: "string"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        bio:
+          type: "string"
+          nullable: true
+        displayName:
+          type: "string"
+          nullable: true
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "id"
+        - "keycloakId"
+        - "name"
+        - "email"
+        - "createdAt"
+        - "updatedAt"

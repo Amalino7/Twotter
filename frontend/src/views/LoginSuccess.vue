@@ -1,27 +1,15 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useFusionAuth } from '@fusionauth/vue-sdk';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
 onMounted(async () => {
-  const accessToken = route.query.access_token as string | null;
-
-  if (accessToken) {
-    authStore.setAccessToken(accessToken);
-    console.log('Successfully stored access token.');
-
-    // Fetch the user's data before redirecting
-    await authStore.fetchUser();
-
-    router.replace({ name: 'home' });
-  } else {
-    console.error('Login failed: No access token found in the redirect URL.');
-    router.replace({ name: 'Login' });
-  }
+  console.log('route', route, authStore.accessToken, authStore.authenticated);
 });
 </script>
 

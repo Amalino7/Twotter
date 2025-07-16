@@ -15,8 +15,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fusionauth/vue-sdk": "^1.2.0",
     "@tailwindcss/vite": "^4.1.7",
     "emoji-mart-vue-fast": "^15.0.4",
+    "keycloak-js": "^26.2.0",
     "pinia": "^3.0.2",
     "tailwindcss": "^4.1.7",
     "vue": "^3.5.13",

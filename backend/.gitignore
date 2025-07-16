@@ -3,6 +3,8 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+/docs
+.env
 
 ### STS ###
 .apt_generated
@@ -32,5 +34,6 @@ out/
 /nbdist/
 /.nb-gradle/
 
+./.idea/*
 ### VS Code ###
 .vscode/
