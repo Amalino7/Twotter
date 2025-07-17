@@ -17,31 +17,24 @@ class CommentService(val commentRepository: CommentRepository) {
         ).toResponse()
     }
 
-    suspend fun get(id: Long, postId: String): CommentResponse? {
+    suspend fun get(id: Long): CommentResponse? {
         val comment = commentRepository.getById(id)
         if (comment == null) {
             throw AppException.NotFoundException("Comment with id $id not found")
         }
 
-        if (comment.postId != Uuid.parse(postId)) {
-            throw AppException.ConflictException("Comment with id $id does not belong to post $postId")
-        }
-
         return comment.toResponse()
     }
 
-    suspend fun update(dto: CommentUpdateRequest, user: User, postId: String): CommentResponse {
-        val oldComment = commentRepository.getById(dto.id.toLong())
+    suspend fun update(dto: CommentUpdateRequest, user: User, commentId: String): CommentResponse {
+        val oldComment = commentRepository.getById(commentId.toLong())
 
         if (oldComment == null) {
-            throw BadRequestException("Comment with id ${dto.id} not found")
+            throw BadRequestException("Comment with id $commentId not found")
         }
 
-        if (oldComment.postId != Uuid.parse(postId)) {
-            throw AppException.ConflictException("post id's don't match!")
-        }
         if (oldComment.user.id != user.id) {
-            throw AppException.UnauthorizedException("Comment with id ${dto.id} does not belong to user")
+            throw AppException.UnauthorizedException("Comment with id $commentId does not belong to user")
         }
 
         val newComment = Comment(
@@ -53,13 +46,10 @@ class CommentService(val commentRepository: CommentRepository) {
         return commentRepository.update(newComment).toResponse()
     }
 
-    suspend fun delete(id: Long, postId: String, user: User): Boolean {
+    suspend fun delete(id: Long, user: User): Boolean {
         val comment = commentRepository.getById(id)
         if (comment == null) {
             throw BadRequestException("Comment with id $id not found")
-        }
-        if (comment.postId != Uuid.parse(postId)) {
-            throw AppException.ConflictException("post id's don't match!")
         }
         if (comment.user.id != user.id) {
             throw AppException.UnauthorizedException("Comment with id ${comment.id} does not belong to user")

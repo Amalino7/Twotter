@@ -1,7 +1,8 @@
 package elsys.amalino7.plugins
 
 
-import elsys.amalino7.features.comment.CommentRoutes
+import elsys.amalino7.features.comment.commentRoutes
+import elsys.amalino7.features.post.postRoutes
 import elsys.amalino7.features.user.userRoutes
 import elsys.amalino7.utils.AppException
 import io.ktor.http.*
@@ -53,6 +54,7 @@ fun Application.configureRouting() {
     }
     routing {
         userRoutes(getKoin().get())
-        CommentRoutes(getKoin().get())
+        commentRoutes(getKoin().get())
+        postRoutes(getKoin().get())
     }
 }

@@ -5,8 +5,121 @@ info:
   version: "1.0.0"
 servers:
   - url: "https://amalino7"
-  - url: "http://localhost:8080"
 paths:
+  /comments/{id}:
+    delete:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+    patch:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentUpdateRequest"
+        required: true
+      responses:
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /feed:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostResponse"
   /post/{postId}/comments:
     get:
       description: ""
@@ -55,72 +168,38 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CommentResponse"
-  /post/{postId}/comments/{id}:
-    delete:
+  /posts:
+    get:
       description: ""
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-        - name: "postId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
       responses:
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-        "409":
-          description: "Conflict"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
         "200":
           description: "OK"
           content:
             '*/*':
               schema:
-                type: "object"
-        "404":
-          description: "Not Found"
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostResponse"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostCreateRequest"
+        required: true
+      responses:
+        "201":
+          description: "Created"
           content:
             '*/*':
               schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-    get:
+                $ref: "#/components/schemas/PostResponse"
+  /posts/{id}:
+    delete:
       description: ""
       parameters:
         - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-        - name: "postId"
           in: "path"
           required: true
           schema:
@@ -137,8 +216,8 @@ paths:
                   value: ""
                 Example#2:
                   value: ""
-        "409":
-          description: "Conflict"
+        "401":
+          description: "Unauthorized"
           content:
             '*/*':
               schema:
@@ -151,7 +230,31 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/CommentResponse"
+                type: "object"
+    get:
+      description: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostResponse"
     patch:
       description: ""
       parameters:
@@ -160,29 +263,15 @@ paths:
           required: true
           schema:
             type: "string"
-        - name: "postId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommentUpdateRequest"
+              $ref: "#/components/schemas/PostPatchRequest"
         required: true
       responses:
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-        "409":
-          description: "Conflict"
+        "404":
+          description: "Not Found"
           content:
             '*/*':
               schema:
@@ -199,6 +288,12 @@ paths:
               examples:
                 Example#1:
                   value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostResponse"
   /users:
     get:
       description: ""
@@ -299,6 +394,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/User"
+  /users/{userId}/posts:
+    get:
+      description: ""
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PostResponse"
   /users/me:
     get:
       description: ""
@@ -325,6 +438,53 @@ components:
         - "id"
         - "postId"
         - "content"
+    CommentUpdateRequest:
+      type: "object"
+      properties:
+        content:
+          type: "string"
+          nullable: true
+    PostResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        content:
+          type: "string"
+        imageUrl:
+          type: "string"
+          nullable: true
+        userId:
+          type: "string"
+        userHandle:
+          type: "string"
+        userDisplayName:
+          type: "string"
+          nullable: true
+        hasLiked:
+          type: "boolean"
+        likesCount:
+          type: "integer"
+          format: "int64"
+        commentsCount:
+          type: "integer"
+          format: "int64"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "id"
+        - "content"
+        - "userId"
+        - "userHandle"
+        - "hasLiked"
+        - "likesCount"
+        - "commentsCount"
+        - "createdAt"
+        - "updatedAt"
     CommentCreateRequest:
       type: "object"
       properties:
@@ -332,17 +492,22 @@ components:
           type: "string"
       required:
         - "content"
-    CommentUpdateRequest:
+    PostCreateRequest:
       type: "object"
       properties:
-        id:
-          type: "integer"
-          format: "int32"
         content:
+          type: "string"
+        imageId:
           type: "string"
           nullable: true
       required:
-        - "id"
+        - "content"
+    PostPatchRequest:
+      type: "object"
+      properties:
+        content:
+          type: "string"
+          nullable: true
     UserResponse:
       type: "object"
       properties:

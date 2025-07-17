@@ -9,7 +9,6 @@ data class CommentCreateRequest(
 
 @Serializable
 data class CommentUpdateRequest(
-    val id: Int,
     val content: String?
 )
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.countDistinct
+import org.jetbrains.exposed.v1.core.dao.id.CompositeIdTable
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.CurrentTimestamp
@@ -26,6 +27,7 @@ object Users : UUIDTable("users") {
 object Posts : UUIDTable("posts") {
     val user = reference("user_id", Users)
     val content = text("content")
+    val postType = text("post_type").default("original")
     val imageId = reference("image_id", Images.id).nullable().uniqueIndex()
     val originalPost = reference("original_post_id", Posts).nullable()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
@@ -43,11 +45,11 @@ object Follows : Table("follows") {
     override val primaryKey = PrimaryKey(follower, followee)
 }
 
-object Likes : Table() {
-    val userId = reference("user_id", Users).index()
-    val postId = uuid("post_id").references(Posts.id).index()
+object Likes : CompositeIdTable("likes") {
+    val userId = uuid("user_id").references(Users.id).entityId().index()
+    val postId = uuid("post_id").references(Posts.id).entityId().index()
 
-    override val primaryKey = PrimaryKey(userId, postId)
+    override val primaryKey = PrimaryKey(userId, postId, name = "composite_id")
 }
 
 object Comments : IntIdTable("comments") {
@@ -57,15 +59,6 @@ object Comments : IntIdTable("comments") {
     val parentCommentId = reference("parent_id", Comments).nullable()
     val timestamp = timestamp("created_at").defaultExpression(CurrentTimestamp)
 }
-
-//object Reposts : Table("reposts") {
-//    val userId = reference("user_id", Users).index()
-//    val postId = reference("post_id", Posts).index()
-//    val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
-//
-//    override val primaryKey = PrimaryKey(userId, postId)
-//}
-
 
 object Images : UUIDTable() {
     val uploaderId = reference("uploader_id", Users).nullable() // TODO fix

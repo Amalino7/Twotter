@@ -13,7 +13,7 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 @OptIn(ExperimentalDatabaseMigrationApi::class)
 fun Application.connectToDatabase() {
     R2dbcDatabase.connect(
-        url = "r2dbc:postgresql://localhost:5433/test",
+        url = "r2dbc:postgresql://localhost:5433/postgres",
         databaseConfig = {
             connectionFactoryOptions {
                 option(ConnectionFactoryOptions.USER, "postgres")
@@ -31,7 +31,7 @@ fun Application.connectToDatabase() {
             val schema = Schema("test")
             SchemaUtils.createSchema(schema)
             SchemaUtils.setSchema(schema)
-            SchemaUtils.create(Users)
+            SchemaUtils.create(Users, Comments, Posts, Follows, Likes, Images)
         }
     }
 
