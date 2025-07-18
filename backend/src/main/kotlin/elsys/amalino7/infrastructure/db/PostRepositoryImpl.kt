@@ -2,6 +2,8 @@ package elsys.amalino7.infrastructure.db
 
 import elsys.amalino7.features.post.Post
 import elsys.amalino7.features.post.PostRepository
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.PageResult
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
@@ -12,21 +14,23 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 class PostRepositoryImpl : PostRepository {
-    override suspend fun getAll(): List<Post> {
+    override suspend fun getAll(input: PageRequest): PageResult<Post> {
         return query {
-            postQuery()
+            val items = postQuery()
                 .orderBy(Posts.createdAt, SortOrder.DESC)
-                .limit(100)
+                .offset(input.size * (input.page - 1))
+                .limit(input.size)
                 .map {
                     it.toPost(hasLikedAlias(null))
                 }
                 .toList()
+            PageResult(items, null)
         }
     }
 
     private fun hasLikedCase(userId: Uuid) = Case()
-        .When((Likes.userId eq userId.toJavaUuid()) and (Likes.postId eq Posts.id), booleanLiteral(true))
-        .Else(booleanLiteral(false))
+        .When(Likes.userId eq userId.toJavaUuid(), Op.TRUE)
+        .Else(Op.FALSE)
         .alias("has_liked")
 
     private fun hasLikedAlias(userId: Uuid?) =
@@ -57,7 +61,7 @@ class PostRepositoryImpl : PostRepository {
                         + Comments.postId.count().alias("comment_count")
                         + hasLikedAlias
             )
-            .groupBy(Posts.id, Users.id, Images.minioObjectKey)
+            .groupBy(Posts.id, Users.id, Images.minioObjectKey, Likes.userId)
 
     }
 

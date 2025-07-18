@@ -53,6 +53,14 @@ fun Application.configureRouting() {
         }
     }
     routing {
+        // Official
+        route("/api/v1")
+        {
+            userRoutes(getKoin().get())
+            commentRoutes(getKoin().get())
+            postRoutes(getKoin().get())
+        }
+        // Testing
         userRoutes(getKoin().get())
         commentRoutes(getKoin().get())
         postRoutes(getKoin().get())

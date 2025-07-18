@@ -13,8 +13,8 @@ fun Application.configureAdministration() {
             install(RateLimiting) {
                 rateLimiter {
                     type = TokenBucket::class
-                    capacity = 100
-                    rate = 10.seconds
+                    capacity = 200
+                    rate = 60.seconds
                 }
             }
         }

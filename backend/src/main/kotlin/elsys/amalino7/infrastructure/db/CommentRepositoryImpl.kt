@@ -2,6 +2,8 @@ package elsys.amalino7.infrastructure.db
 
 import elsys.amalino7.features.comment.Comment
 import elsys.amalino7.features.comment.CommentRepository
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.PageResult
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
@@ -17,12 +19,13 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 class CommentRepositoryImpl : CommentRepository {
-    override suspend fun getAll(): List<Comment> = query {
-        Comments.join(Users, JoinType.INNER, Comments.userId, Users.id)
+    override suspend fun getAll(input: PageRequest): PageResult<Comment> = query {
+        val comments = Comments.join(Users, JoinType.INNER, Comments.userId, Users.id)
             .selectAll()
             .limit(100)
             .map { it.toComment() }
             .toList()
+        return@query PageResult(comments, null)
     }
 
     override suspend fun create(

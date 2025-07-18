@@ -2,12 +2,19 @@ package elsys.amalino7.features.post
 
 import elsys.amalino7.features.user.User
 import elsys.amalino7.utils.AppException
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.PageResult
 import kotlinx.datetime.Clock
 import kotlin.uuid.Uuid
 
 class PostService(val postRepository: PostRepository) {
-    suspend fun getPosts(): List<PostResponse> {
-        return postRepository.getAll().map { it.toResponse() }
+    suspend fun getPosts(input: PageRequest): PageResult<PostResponse> {
+        if (input.size > 100) {
+            throw AppException.ValidationException("You can't request more than 100 posts at once.")
+        }
+        val res = postRepository.getAll(input)
+        val items = res.items.map { it.toResponse() }
+        return PageResult(items, res.totalCount)
     }
 
     suspend fun createPost(post: PostCreateRequest, user: User): PostResponse {

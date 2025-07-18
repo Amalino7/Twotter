@@ -1,6 +1,9 @@
 package elsys.amalino7.features.post
 
 import elsys.amalino7.features.user.User
+import elsys.amalino7.utils.Direction
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.Sort
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -11,8 +14,18 @@ import kotlin.uuid.Uuid
 fun Route.postRoutes(postService: PostService) {
     route("/posts") {
         get {
-            val post = postService.getPosts()
-            call.respond(HttpStatusCode.OK, post)
+            val page = call.queryParameters["page"]?.toLong() ?: 1
+            val size = call.queryParameters["size"]?.toInt() ?: 10
+            val sortProperty = call.queryParameters["sort"] ?: ""
+            val sortDirection = when (call.queryParameters["dir"]) {
+                "ASC" -> Direction.ASC
+                "DESC" -> Direction.DESC
+                else -> Direction.NONE
+            }
+            val sort = Sort(sortProperty, sortDirection)
+            val pageRequest = PageRequest(page, size, sort)
+            val posts = postService.getPosts(pageRequest)
+            call.respond(HttpStatusCode.OK, posts)
         }
         get("/{id}")
         {

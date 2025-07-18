@@ -1,6 +1,9 @@
 package elsys.amalino7.features.user
 
 import elsys.amalino7.utils.AppException
+import elsys.amalino7.utils.Direction
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.Sort
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -15,6 +18,7 @@ fun Route.userRoutes(
     get("/users") {
         val users = userService
             .getAll()
+            .items
             .map { it.toResponse() }
         call.respond(users)
     }
@@ -24,7 +28,7 @@ fun Route.userRoutes(
         if (user == null) {
             call.respond(HttpStatusCode.NotFound)
         } else {
-            call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK, user.toResponse())
         }
     }
     post("/users") {
@@ -65,6 +69,40 @@ fun Route.userRoutes(
         get("/users/me") {
             val user = call.principal<User>()!!
             call.respond(user)
+        }
+    }
+    get("/users/{id}/followers")
+    {
+        val userId = call.parameters["id"]!!
+        val res = userService.getFollowersById(Uuid.parse(userId), PageRequest(1, 100, Sort("name", Direction.NONE)))
+        call.respond(HttpStatusCode.OK, res)
+    }
+    get("/users/{id}/following")
+    {
+        val userId = call.parameters["id"]!!
+        val res = userService.getFollowingById(Uuid.parse(userId), PageRequest(1, 100, Sort("name", Direction.NONE)))
+        call.respond(HttpStatusCode.OK, res)
+    }
+    authenticate("auth-jwt") {
+        post("/users/{id}/followers")
+        {
+            val userId = call.parameters["id"]!!
+            val followerId = call.principal<User>()!!.id
+            val res = userService.addFollowerForUser(Uuid.parse(userId), followerId)
+            if (!res) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+            call.respond(HttpStatusCode.NoContent)
+        }
+        delete("/users/{id}/followers")
+        {
+            val userId = call.parameters["id"]!!
+            val followerId = call.principal<User>()!!.id
+            val res = userService.deleteFollowerForUser(Uuid.parse(userId), followerId)
+            if (!res) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 

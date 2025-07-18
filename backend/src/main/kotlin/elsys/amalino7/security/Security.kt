@@ -1,7 +1,9 @@
 package elsys.amalino7.security
 
 import com.auth0.jwk.UrlJwkProvider
+import elsys.amalino7.features.user.UserCreateRequest
 import elsys.amalino7.features.user.UserService
+import elsys.amalino7.features.user.toUser
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -25,16 +27,29 @@ fun Application.configureSecurity() {
                 withIssuer(issuer)
             }
             validate { credential ->
+                println("Validate triggered")
                 val azp = credential.payload.getClaim("azp")?.asString()
                 if (azp == "twotter") {
                     credential.payload.subject?.let { keycloakId ->
-                        userService.getUserByKeycloakId(keycloakId)
+                        var user = userService.getUserByKeycloakId(keycloakId)
+                        if (user == null) {
+                            user = userService.create(
+                                UserCreateRequest(
+                                    credential.payload.getClaim("name").asString(),
+                                    credential.payload.getClaim("email").asString(),
+                                    keycloakId
+                                ).toUser()
+                            )
+                        }
+                        user
                     }
                 } else {
                     null // Will result in 401 Unauthorized
                 }
             }
-            challenge { _, _ ->
+            challenge { arg1, arg2 ->
+                println("Challenge triggered")
+                println("$arg1, $arg2")
                 call.respond(HttpStatusCode.Unauthorized, "Token validation failed")
             }
         }

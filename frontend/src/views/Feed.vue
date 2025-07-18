@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
 import { apiURL, useAuthStore } from '@/stores/auth';
-import { PostResponse } from '@/types/dtos.ts';
+import { type PostResponse } from '@/types/dtos.ts';
 
 const posts = ref<PostResponse[]>([]);
 const authStore = useAuthStore();
@@ -17,7 +17,7 @@ async function fetchPosts() {
   }
 
   try {
-    const response = await fetch(`${apiURL}users/${authStore.user?.id}/feed`, {
+    const response = await fetch(`${apiURL}feed`, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',
@@ -51,16 +51,16 @@ onMounted(fetchPosts);
       <Post
         v-for="post in posts"
         :key="post.id"
-        :user-id="post.userId"
-        :text="post.content"
-        :username="post.userDisplayName"
-        :user-handle="post.userHandle"
-        :timestamp="new Date(post.createdAt)"
+        :comments-count="post.commentsCount"
+        :has-liked="post.hasLiked"
         :image-url="post.imageUrl"
         :likes-count="post.likesCount"
-        :comments-count="post.commentsCount"
         :reposts-count="post.repostsCount"
-        :has-liked="post.hasLiked"
+        :text="post.content"
+        :timestamp="new Date(post.createdAt)"
+        :user-handle="post.userHandle"
+        :user-id="post.userId"
+        :username="post.userDisplayName"
       >
       </Post>
     </div>
