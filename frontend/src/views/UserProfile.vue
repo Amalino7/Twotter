@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { apiURL, useAuthStore, type User } from '@/stores/auth';
+import { useAuthStore, type User } from '@/stores/auth';
 import Post from '@/components/PostComponents/Post.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import type { PostResponse } from '@/types/dtos.ts';
 import { useRoute } from 'vue-router';
+import { apiURL } from '@/utils/api.ts';
 
 const authStore = useAuthStore();
 const userPosts = ref<PostResponse[]>([]);
@@ -84,7 +85,7 @@ async function fetchUserProfile(handle: string) {
   }
 
   try {
-    const response = await fetch(`${apiURL}users/${handle}`, {
+    const response = await fetch(`${apiURL}/users/${handle}`, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ async function fetchUserPosts(userId: string) {
   }
 
   try {
-    const response = await fetch(`${apiURL}users/${userId}/posts`, {
+    const response = await fetch(`${apiURL}/users/${userId}/posts`, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',

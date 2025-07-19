@@ -1,8 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import Post from '../components/PostComponents/Post.vue';
-import { apiURL, useAuthStore } from '@/stores/auth';
-import { PostResponse } from '@/types/dtos.ts';
+import { useAuthStore } from '@/stores/auth';
+import { type PostResponse } from '@/types/dtos.ts';
+import { api } from '@/utils/api.ts';
 
 const posts = ref<PostResponse[]>([]);
 const authStore = useAuthStore();
@@ -11,34 +12,7 @@ const authStore = useAuthStore();
  * Fetches the user's post feed from the API.
  */
 async function fetchPosts() {
-  if (!authStore.accessToken) {
-    console.error('Authentication token not found.');
-    return;
-  }
-
-  try {
-    const response = await fetch(`${apiURL}users/${authStore.user?.id}/feed`, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        console.error('Unauthorized: User ID does not match or token is invalid.');
-        // Handle unauthorized access, e.g., by logging the user out
-        authStore.logout();
-      } else {
-        throw new Error(`Failed to fetch posts with status: ${response.status}`);
-      }
-      return;
-    }
-
-    posts.value = await response.json();
-  } catch (error) {
-    console.error('An error occurred while fetching the post feed:', error);
-  }
+  posts.value = await api.get<PostResponse[]>('/feed');
 }
 
 // Fetch the posts when the component is mounted
@@ -51,16 +25,16 @@ onMounted(fetchPosts);
       <Post
         v-for="post in posts"
         :key="post.id"
-        :user-id="post.userId"
-        :text="post.content"
-        :username="post.userDisplayName"
-        :user-handle="post.userHandle"
-        :timestamp="new Date(post.createdAt)"
+        :comments-count="post.commentsCount"
+        :has-liked="post.hasLiked"
         :image-url="post.imageUrl"
         :likes-count="post.likesCount"
-        :comments-count="post.commentsCount"
         :reposts-count="post.repostsCount"
-        :has-liked="post.hasLiked"
+        :text="post.content"
+        :timestamp="new Date(post.createdAt)"
+        :user-handle="post.userHandle"
+        :user-id="post.userId"
+        :username="post.userDisplayName"
       >
       </Post>
     </div>

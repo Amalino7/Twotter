@@ -1,37 +1,68 @@
 package elsys.amalino7.plugins
 
-import elsys.amalino7.db.CommentRepositoryImpl
-import elsys.amalino7.db.PostRepositoryImpl
-import elsys.amalino7.db.UserRepositoryImpl
-import elsys.amalino7.domain.services.PostService
-import elsys.amalino7.domain.services.UserService
-import elsys.amalino7.routes.commentsRoute
-import elsys.amalino7.routes.imageRoutes
-import elsys.amalino7.routes.postRoute
+
+import elsys.amalino7.features.comment.commentRoutes
+import elsys.amalino7.features.post.postRoutes
+import elsys.amalino7.features.user.userRoutes
+import elsys.amalino7.utils.AppException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import userRoute
+import org.koin.java.KoinJavaComponent.getKoin
 
 fun Application.configureRouting() {
-    val userService = UserService(userRepository = UserRepositoryImpl())
-    val postService = PostService(PostRepositoryImpl(), UserRepositoryImpl())
+//    install(RequestValidation) {
+//        validate<String> { bodyText ->
+//            if (!bodyText.startsWith("Hello"))
+//                ValidationResult.Invalid("Body text should start with 'Hello'")
+//            else ValidationResult.Valid
+//        }
+//    }
     install(StatusPages) {
         exception<IllegalArgumentException> { call, cause ->
-            call.respondText(text = "Invalid endpoint argument", status = HttpStatusCode.BadRequest)
+            call.respond(HttpStatusCode.BadRequest, "${cause.localizedMessage}")
         }
+        exception<AppException.ConflictException> { call, cause ->
+            call.respond(HttpStatusCode.Conflict, "${cause.localizedMessage}")
+        }
+        exception<AppException.NotFoundException> { call, cause ->
+            call.respond(HttpStatusCode.NotFound, "${cause.localizedMessage}")
+        }
+        exception<AppException.ValidationException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, "${cause.localizedMessage}")
+        }
+        exception<AppException.UnauthorizedException> { call, cause ->
+            call.respond(HttpStatusCode.Unauthorized, "${cause.localizedMessage}")
+        }
+        exception<AppException.DatabaseException> { call, cause ->
+            if (cause.localizedMessage.contains("unique")) {
+                call.respond(HttpStatusCode.BadRequest, "${cause.localizedMessage}")
+            }
+            cause.printStackTrace()
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+        exception<NumberFormatException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, "${cause.localizedMessage}")
+        }
+
         exception<Throwable> { call, cause ->
-            call.respondText(text = "500: Server imploded :(((", status = HttpStatusCode.InternalServerError)
-            println(cause.printStackTrace())
+            cause.printStackTrace()
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
-
     routing {
-        imageRoutes()
-        userRoute(userService = userService)
-        postRoute(postService = postService, userService = userService)
-        commentsRoute(commentsService = CommentRepositoryImpl())
+        // Official
+        route("/api/v1")
+        {
+            userRoutes(getKoin().get())
+            commentRoutes(getKoin().get())
+            postRoutes(getKoin().get())
+        }
+        // Testing
+        userRoutes(getKoin().get())
+        commentRoutes(getKoin().get())
+        postRoutes(getKoin().get())
     }
 }

@@ -1,7 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 // This could be an environment variable
-import { apiURL } from '@/stores/auth.ts';
+import { useAuthStore } from '@/stores/auth.ts';
+import { apiURL } from '@/utils/api.ts';
 
+const authStore = useAuthStore();
 const backendLoginUrl = `${apiURL}login`;
 </script>
 
@@ -10,8 +12,8 @@ const backendLoginUrl = `${apiURL}login`;
     <h1 class="text-2xl font-bold mb-4">Welcome</h1>
     <p class="mb-6">Please log in to continue.</p>
     <a
-      :href="backendLoginUrl"
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      @click.prevent="authStore.login()"
     >
       Login with OAuth
     </a>

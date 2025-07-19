@@ -11,69 +11,46 @@ services:
   my-keycloak:
     image: docker.io/keycloak/keycloak:26.2.5
     environment:
-      #      KC_FRONTEND_URL: "https://keycloak.malinovi.com"
       KC_HOSTNAME: localhost
-      #      KC_HOSTNAME_STRICT: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HEALTH_ENABLED: "true"
+      KC_HEALTH_ENABLED: true
       KC_LOG_LEVEL: info
       KC_HTTP_PORT: 7080
-      #      KC_PROXY_ADDRESS_FORWARDING: "true"
-      #      KC_PROXY_HEADERS: xforwarded
-      
-      KC_EMAIL_FROM: ${KC_EMAIL}
-      KC_EMAIL_FROM_DISPLAY_NAME: "Keycloak Admin"
-      KC_EMAIL_REPLY_TO: support@example.com
-      KC_EMAIL_REPLY_TO_DISPLAY_NAME: "Support Team"
-      KC_EMAIL_SMTP_HOST: smtp.gmail.com
-      KC_EMAIL_SMTP_PORT: 587
-      KC_EMAIL_SMTP_AUTH: true
-      KC_EMAIL_SMTP_USER: ${KC_EMAIL}
-      KC_EMAIL_SMTP_PASSWORD: ${EMAIL_PASSWORD}
-      KC_EMAIL_SMTP_STARTTLS: true
+      KC_METRICS_ENABLED: true
     env_file:
       - .env
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/ready" ]
-      interval: 15s
-      timeout: 2s
-      retries: 15
-    command: [ "start-dev", "--http-port", "7080", "--import-realm", "--verbose" ]
+    command: [ "start-dev", "--http-port", "7080" ]
     ports:
       - "7080:7080"
     volumes:
-      - ./keycloak-config:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
-  #      - ./keycloak-theme/vue-theme:/opt/keycloak/themes/vue-theme
   
   db:
     image: postgres:17
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: 'postgres'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
     ports:
-      - ${POSTGRES_PORT}:5432
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env
-  
-  minio:
-    image: docker.io/bitnami/minio:latest
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    volumes:
-      - minio_data:/bitnami/minio/data
-    environment:
-      - MINIO_ROOT_USER=${MINIO_NAME}
-      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
-    #      - MINIO_DEFAULT_BUCKETS=${MINIO_BUCKET}
-    env_file:
-      - .env
+
+#  minio:
+#    image: docker.io/bitnami/minio:latest
+#    ports:
+#      - '9000:9000'
+#      - '9001:9001'
+#    volumes:
+#      - minio_data:/bitnami/minio/data
+#    environment:
+#      - MINIO_ROOT_USER=${MINIO_NAME}
+#      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
+#    #      - MINIO_DEFAULT_BUCKETS=${MINIO_BUCKET}
+#    env_file:
+#      - .env
 volumes:
   postgres_data:
   keycloak-data:

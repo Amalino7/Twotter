@@ -92,7 +92,8 @@ import { computed, ref } from 'vue';
 import data from 'emoji-mart-vue-fast/data/twitter.json';
 import { EmojiIndex, Picker } from 'emoji-mart-vue-fast/src';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
-import { useAuthStore, apiURL } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth';
+import { apiURL } from '@/utils/api.js';
 
 const authStore = useAuthStore();
 const emojiIndex = new EmojiIndex(data);
@@ -138,7 +139,7 @@ const submitTwott = async () => {
   }
 
   try {
-    const response = await fetch(`${apiURL}posts`, {
+    const response = await fetch(`${apiURL}/posts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
