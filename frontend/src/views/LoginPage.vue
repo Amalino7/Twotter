@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 // This could be an environment variable
-import { apiURL } from '@/stores/auth.ts';
 import { useAuthStore } from '@/stores/auth.ts';
+import { apiURL } from '@/utils/api.ts';
 
 const authStore = useAuthStore();
 const backendLoginUrl = `${apiURL}login`;

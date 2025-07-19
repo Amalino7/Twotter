@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import keycloak from '@/utils/keycloak.ts';
-
-export const apiURL = 'http://localhost:8080/';
+import { apiURL } from '@/utils/api.ts';
 
 /**
  * Defines the structure of a user object based on the API response.
@@ -21,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: null as string | null,
     authenticated: false,
-    user: null as User | null, // Add user to the state
+    user: null as User | null,
   }),
   getters: {
     /**
@@ -31,15 +30,16 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => state.authenticated,
   },
   actions: {
-    login() {
-      keycloak.login();
+    async login() {
+      await keycloak.login();
     },
     async init() {
       try {
         await keycloak.init({
           pkceMethod: 'S256',
+          silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
           onLoad: 'check-sso',
-          // redirectUri: 'http://localhost:5173/login-success',
+          flow: 'standard',
         });
 
         this.authenticated = keycloak.authenticated || false;
@@ -48,28 +48,34 @@ export const useAuthStore = defineStore('auth', {
           await this.fetchUser();
         }
 
-        keycloak.onTokenExpired = async () => {
-          try {
-            const refreshed = await keycloak.updateToken(5);
-            if (refreshed) {
-              console.log('[Auth] Token refreshed');
-              this.accessToken = keycloak.token ?? null;
-            } else {
-              console.warn('[Auth] Token not refreshed — still valid');
-            }
-          } catch (err) {
-            console.error('[Auth] Token refresh failed, logging out');
-            this.logout();
-          }
-        };
+        keycloak.onTokenExpired = this.refreshToken;
       } catch (err) {
         console.error('Keycloak init failed', err);
         this.authenticated = false;
       }
     },
 
-    logout() {
-      keycloak.logout();
+    async refreshToken() {
+      try {
+        const refreshed = await keycloak.updateToken(5);
+        if (refreshed) {
+          console.log('[Auth] Token refreshed');
+          this.accessToken = keycloak.token ?? null;
+          this.authenticated = true;
+        } else {
+          console.warn('[Auth] Token not refreshed — still valid');
+        }
+      } catch (err: any) {
+        console.error('[Auth] Token refresh failed, logging out', err);
+        await this.logout();
+      }
+    },
+
+    async logout() {
+      // await keycloak.logout();
+      if (keycloak.authenticated) {
+        await keycloak.logout();
+      }
       this.authenticated = false;
       this.accessToken = null;
       this.user = null;
@@ -82,7 +88,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const response = await fetch(`${apiURL}users/me`, {
+        const response = await fetch(`${apiURL}/users/me`, {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
@@ -96,7 +102,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = await response.json();
       } catch (error) {
         console.error('An error occurred while fetching user data:', error);
-        // this.logout();
+        await this.logout();
       }
     },
   },
