@@ -1,4 +1,5 @@
-# Twotter Documentation
+# Twotter
+Twitter clone, because why not
 
 ## 1. Main Functionalities (User Stories)
 
