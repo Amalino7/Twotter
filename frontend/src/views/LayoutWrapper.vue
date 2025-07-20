@@ -13,7 +13,9 @@ const isMobile = computed(() => width.value < 768);
 <template>
   <div class="flex flex-row h-screen w-screen" v-if="!isMobile">
     <Navigation :is-mobile="isMobile"></Navigation>
-    <div class="flex-3 bg-gray-800 overflow-auto max-w-3xl border-l border-r border-gray-700">
+    <div
+      class="flex-3 bg-gray-800 overflow-auto max-w-3xl border-l border-r border-gray-700 backdrop-blur-3xl"
+    >
       <RouterView></RouterView>
     </div>
     <div class="flex-1 bg-gray-900 border-l border-gray-700">

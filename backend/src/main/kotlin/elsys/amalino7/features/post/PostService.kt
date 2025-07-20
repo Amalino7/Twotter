@@ -80,4 +80,7 @@ class PostService(val postRepository: PostRepository) {
     suspend fun getFeedOfUser(userId: Uuid): List<PostResponse> {
         return postRepository.getPostsOfUserByCriteria(userId).map { it.toResponse() }
     }
+
+    suspend fun likePost(postId: Uuid, userId: Uuid) = postRepository.likePost(postId, userId)
+    suspend fun unlikePost(postId: Uuid, userId: Uuid) = postRepository.unlikePost(postId, userId)
 }

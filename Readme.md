@@ -1,4 +1,5 @@
 # Twotter
+
 Twitter clone, because why not
 
 ## 1. Main Functionalities (User Stories)
@@ -36,7 +37,7 @@ This section describes how a user interacts with the system to achieve their goa
 - **Database: PostgreSQL with Exposed**: A powerful relational database paired with a type-safe SQL DSL.
 - **File Storage: MinIO (S3 Compatible)**: An S3-compatible object storage service for user-generated media.
 
-### 4. Architecture 
+### 4. Architecture
 
 The architecture consists of three primary, decoupled components: a **Vue.js Frontend**, a **Ktor Backend (REST API)**, and a **Keycloak Identity Provider**. This separation of concerns is ideal for modern web applications.
 
@@ -47,31 +48,31 @@ The authentication is handled using the **OAuth2 Authorization Code Flow**, whic
 The diagram below illustrates the complete OAuth2 flow from login to an authenticated API request.
 
 sequenceDiagram  
-    participant User  
-    participant VueApp as Vue.js Frontend  
-    participant Ktor as Ktor Backend  
-    participant Keycloak  
-  
-    User->>+VueApp: 1. Clicks "Login"  
-    VueApp->>+User: 2. Redirect to Keycloak  
-    User->>+Keycloak: 3. Logs in with credentials  
-    Keycloak-->>-User: 4. Redirect to Ktor backend <br> (callbackUrl) with auth code  
-    User->>+Ktor: 5. Forwards auth code  
-    Ktor->>+Keycloak: 6. Exchanges auth code for tokens <br> (Server-to-Server)  
-    Keycloak-->>-Ktor: 7. Responds with Access & ID Tokens  
-    Ktor-->>-User: 8. Redirect to frontend <br> (frontendLoginSuccessUrl) <br> with tokens  
-    User->>+VueApp: 9. Forwards tokens  
-    VueApp->>VueApp: 10. Stores tokens securely  
-  
-    Note right of VueApp: User is now logged in.  
-  
-    User->>+VueApp: 11. Triggers an API action <br> (e.g., Post Twot)  
-    VueApp->>+Ktor: 12. Makes API request with <br> `Authorization: Bearer <Access-Token>`  
-    Ktor->>Ktor: 13. Validates Access Token  
-    Ktor->>+DB((Database)): 14. Performs business logic  
-    DB-->>-Ktor:  
-    Ktor-->>-VueApp: 15. API Response  
-    VueApp-->>-User: 16. Updates UI  
+ participant User  
+ participant VueApp as Vue.js Frontend  
+ participant Ktor as Ktor Backend  
+ participant Keycloak
+
+    User->>+VueApp: 1. Clicks "Login"
+    VueApp->>+User: 2. Redirect to Keycloak
+    User->>+Keycloak: 3. Logs in with credentials
+    Keycloak-->>-User: 4. Redirect to Ktor backend <br> (callbackUrl) with auth code
+    User->>+Ktor: 5. Forwards auth code
+    Ktor->>+Keycloak: 6. Exchanges auth code for tokens <br> (Server-to-Server)
+    Keycloak-->>-Ktor: 7. Responds with Access & ID Tokens
+    Ktor-->>-User: 8. Redirect to frontend <br> (frontendLoginSuccessUrl) <br> with tokens
+    User->>+VueApp: 9. Forwards tokens
+    VueApp->>VueApp: 10. Stores tokens securely
+
+    Note right of VueApp: User is now logged in.
+
+    User->>+VueApp: 11. Triggers an API action <br> (e.g., Post Twot)
+    VueApp->>+Ktor: 12. Makes API request with <br> `Authorization: Bearer <Access-Token>`
+    Ktor->>Ktor: 13. Validates Access Token
+    Ktor->>+DB((Database)): 14. Performs business logic
+    DB-->>-Ktor:
+    Ktor-->>-VueApp: 15. API Response
+    VueApp-->>-User: 16. Updates UI
 
 **Flow Description:**
 
@@ -87,6 +88,7 @@ sequenceDiagram
 10. The **Vue.js Frontend** securely stores the tokens (e.g., in memory) and uses them for subsequent API calls.
 11. When the user performs an action, the Vue app sends a request to the Ktor backend API, adding the `access_token` to the `Authorization` header.
 12. The **Ktor Backend** validates the token on every incoming request before processing it, ensuring the endpoint is secure.
+
 ## 5. Scalability
 
 The application is designed with scalability in mind, thanks to several key architectural choices:

@@ -38,6 +38,18 @@ fun Route.postRoutes(postService: PostService) {
             }
         }
         authenticate("auth-jwt") {
+            post("/{id}/likes") {
+                val userId = call.principal<User>()!!.id
+                val postId = call.parameters["id"]!!
+                postService.likePost(Uuid.parse(postId), userId)
+                call.respond(HttpStatusCode.NoContent)
+            }
+            delete("/{id}/likes") {
+                val userId = call.principal<User>()!!.id
+                val postId = call.parameters["id"]!!
+                postService.unlikePost(Uuid.parse(postId), userId)
+                call.respond(HttpStatusCode.NoContent)
+            }
             post {
                 val user = call.principal<User>()!!
                 val post = postService.createPost(call.receive<PostCreateRequest>(), user)

@@ -107,6 +107,17 @@ class PostRepositoryImpl : PostRepository {
         }
     }
 
+    override suspend fun likePost(postId: Uuid, userId: Uuid) {
+        Likes.insertIgnore {
+            it[Likes.postId] = postId.toJavaUuid()
+            it[Likes.userId] = userId.toJavaUuid()
+        }
+    }
+
+    override suspend fun unlikePost(postId: Uuid, userId: Uuid) {
+        Likes.deleteWhere { (Likes.postId eq postId.toJavaUuid()) and (Likes.userId eq userId.toJavaUuid()) }
+    }
+
     override suspend fun delete(id: Uuid): Boolean = query {
         Posts.deleteWhere { Posts.id eq id.toJavaUuid() } > 0
     }
