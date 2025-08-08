@@ -13,6 +13,13 @@ import kotlin.uuid.Uuid
 
 fun Route.postRoutes(postService: PostService) {
     route("/posts") {
+        authenticate("auth-jwt", optional = true) {
+            get("/popular") {
+                call.principal<User>()?.id
+                val posts = postService.getPosts(PageRequest(1, 10, Sort("likeCount", Direction.DESC)))
+                call.respond(HttpStatusCode.OK, posts)
+            }
+        }
         get {
             val page = call.queryParameters["page"]?.toLong() ?: 1
             val size = call.queryParameters["size"]?.toInt() ?: 10
@@ -38,6 +45,18 @@ fun Route.postRoutes(postService: PostService) {
             }
         }
         authenticate("auth-jwt") {
+            post("/{id}/likes") {
+                val userId = call.principal<User>()!!.id
+                val postId = call.parameters["id"]!!
+                postService.likePost(Uuid.parse(postId), userId)
+                call.respond(HttpStatusCode.NoContent)
+            }
+            delete("/{id}/likes") {
+                val userId = call.principal<User>()!!.id
+                val postId = call.parameters["id"]!!
+                postService.unlikePost(Uuid.parse(postId), userId)
+                call.respond(HttpStatusCode.NoContent)
+            }
             post {
                 val user = call.principal<User>()!!
                 val post = postService.createPost(call.receive<PostCreateRequest>(), user)
@@ -62,10 +81,13 @@ fun Route.postRoutes(postService: PostService) {
             }
         }
     }
-    get("/users/{userId}/posts") {
-        val userId = call.parameters["userId"]!!
-        val posts = postService.getPostsOfUser(Uuid.parse(userId), call.principal<User>()?.id)
-        call.respond(HttpStatusCode.OK, posts)
+    authenticate("auth-jwt", optional = true) {
+        get("/users/{userId}/posts") {
+            val userId = call.parameters["userId"]!!
+            val requesterId = call.principal<User>()?.id
+            val posts = postService.getPostsOfUser(Uuid.parse(userId), requesterId)
+            call.respond(HttpStatusCode.OK, posts)
+        }
     }
     authenticate("auth-jwt") {
         get("/feed") {

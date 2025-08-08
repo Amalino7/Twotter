@@ -1,4 +1,4 @@
-export interface PostResponse {
+export type PostResponse = {
   id: string;
   content: string;
   userId: string;
@@ -11,4 +11,5 @@ export interface PostResponse {
   likesCount: number;
   commentsCount: number;
   repostsCount: number;
-}
+  postType: string;
+};

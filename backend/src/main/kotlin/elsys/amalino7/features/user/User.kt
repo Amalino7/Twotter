@@ -11,7 +11,15 @@ data class User(
     val name: String,
     val email: String,
     val bio: String? = null,
-    val displayName: String? = null,
+    val displayName: String,
     val createdAt: Instant,
     val updatedAt: Instant
+)
+
+fun User.toView() = UserView(id, name, displayName)
+data class UserView(
+    val id: Uuid,
+    val name: String,
+    val displayName: String,
+    val isFollowed: Boolean? = null
 )

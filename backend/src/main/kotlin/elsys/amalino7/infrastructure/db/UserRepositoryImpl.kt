@@ -15,6 +15,7 @@ import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.r2dbc.*
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 
 class UserRepositoryImpl : UserRepository {
     override suspend fun getAll(input: PageRequest): PageResult<User> {
@@ -109,7 +110,7 @@ class UserRepositoryImpl : UserRepository {
         val totalCount = Follows
             .select(Follows.followee.count())
             .where(Follows.follower eq id.toJavaUuid())
-            .single()[Follows.follower.count()]
+            .single()[Follows.followee.count()]
         return@query PageResult(followers, totalCount)
     }
 
@@ -124,5 +125,29 @@ class UserRepositoryImpl : UserRepository {
     override suspend fun deleteFollowerForUser(userId: Uuid, followerId: Uuid): Boolean = query {
         Follows.deleteWhere { (Follows.follower eq followerId.toJavaUuid()) and (Follows.followee eq userId.toJavaUuid()) } > 0
     }
+
+    override suspend fun isFollowing(followerId: Uuid, followeeId: Uuid): Boolean = query {
+        Follows
+            .selectAll()
+            .where { (Follows.follower eq followerId.toJavaUuid()) and (Follows.followee eq followeeId.toJavaUuid()) }
+            .count() > 0
+    }
+
+    override suspend fun getFollowingStatusForUsers(followerUserId: Uuid, userIds: List<Uuid>): Map<Uuid, Boolean> =
+        query {
+            if (userIds.isEmpty()) return@query emptyMap()
+            Follows
+                .selectAll()
+                .where {
+                    (Follows.follower eq followerUserId.toJavaUuid()) and
+                            (Follows.followee inList userIds.map { it.toJavaUuid() })
+                }
+                .map { it[Follows.followee].value.toKotlinUuid() }
+                .toList()
+                .let { followedIds ->
+                    userIds.associateWith { it in followedIds }
+                }
+        }
+
 }
 

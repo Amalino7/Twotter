@@ -57,6 +57,32 @@
     font-weight: normal;
 }
 
+:root {
+    --primary-color: #3498db; /* Blue */
+    --secondary-color: #2ecc71; /* Green */
+    --accent-color: #e74c3c; /* Red */
+}
+
+.button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+}
+
+.highlight {
+    color: var(--accent-color);
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+
 body {
     min-height: 100vh;
     color: var(--color-text);

@@ -3,7 +3,7 @@ package elsys.amalino7.infrastructure.db
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.alias
-import org.jetbrains.exposed.v1.core.countDistinct
+import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.dao.id.CompositeIdTable
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
@@ -27,9 +27,10 @@ object Users : UUIDTable("users") {
 object Posts : UUIDTable("posts") {
     val user = reference("user_id", Users)
     val content = text("content")
+    val repostCount = long("repost_count").default(0)
     val postType = text("post_type").default("original")
     val imageId = reference("image_id", Images.id).nullable().uniqueIndex()
-    val originalPost = reference("original_post_id", Posts).nullable()
+    val originalPost = reference("original_post_id", Posts).nullable().index()
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp)
     val updatedAt = timestamp("updated_at")
 //        .withDefinition("UPDATE", CurrentTimestamp)
@@ -69,8 +70,8 @@ object Images : UUIDTable() {
 }
 
 object PostAggregates {
-    val likes = Likes.userId.countDistinct().alias("like_count")
-    val comments = Comments.userId.countDistinct().alias("comment_count")
+    val likes = Likes.postId.count().alias("like_count")
+    val comments = Comments.postId.count().alias("comment_count")
 //    val reposts = Reposts.userId.countDistinct().alias("repost_count")
 }
 

@@ -12,4 +12,6 @@ interface UserRepository : CrudRepository<Uuid, User> {
     suspend fun addFollowerForUser(userId: Uuid, followerId: Uuid): Boolean
     suspend fun getUserByKeycloakId(keycloakId: String): User?
     suspend fun deleteFollowerForUser(userId: Uuid, followerId: Uuid): Boolean
+    suspend fun isFollowing(followerId: Uuid, followeeId: Uuid): Boolean
+    suspend fun getFollowingStatusForUsers(followerUserId: Uuid, userIds: List<Uuid>): Map<Uuid, Boolean>
 }

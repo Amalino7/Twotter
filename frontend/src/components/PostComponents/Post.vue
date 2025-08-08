@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import ShareButton from './ShareButton.vue';
 import RetweetIcon from '../icons/RetweetIcon.vue';
 import CommentIcon from '../icons/CommentIcon.vue';
@@ -6,8 +6,10 @@ import convertToTwitterDate from '@/utils/twitterDate.js';
 import SocialButton from './SocialButton.vue';
 import BetterImage from '@/components/BetterImage.vue';
 import TextFormat from '@/components/Utility/TextFormat.vue';
+import { api } from '@/utils/api.ts';
 
 const props = defineProps([
+  'postId',
   'userId',
   'username',
   'userHandle',
@@ -22,6 +24,15 @@ const props = defineProps([
 ]);
 
 const twitterDate = convertToTwitterDate(props.timestamp);
+
+function postLiked(arg: boolean) {
+  if (arg) {
+    api.post(`/posts/${props.postId}/likes`, {});
+  } else {
+    console.log('unliked');
+    api.delete(`/posts/${props.postId}/likes`);
+  }
+}
 </script>
 
 <template>
@@ -61,7 +72,7 @@ const twitterDate = convertToTwitterDate(props.timestamp);
           <span class="ml-1">{{ repostsCount }}</span>
         </button>
 
-        <SocialButton :has-liked="hasLiked" :model-value="likesCount" />
+        <SocialButton @liked="postLiked" :has-liked="hasLiked" :model-value="likesCount" />
         <ShareButton :url="url"></ShareButton>
       </div>
     </div>

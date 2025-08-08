@@ -1,27 +1,21 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import Post from '../components/PostComponents/Post.vue';
-import { useAuthStore } from '@/stores/auth';
-import { type PostResponse } from '@/types/dtos.ts';
+import type { PostResponse } from '@/types/dtos.ts';
 import { api } from '@/utils/api.ts';
+import Post from '@/components/PostComponents/Post.vue';
 
 const posts = ref<PostResponse[]>([]);
-const authStore = useAuthStore();
 
-/**
- * Fetches the user's post feed from the API.
- */
 async function fetchPosts() {
-  posts.value = await api.get<PostResponse[]>('/feed');
+  posts.value = (await api.get<{ items: [PostResponse] }>('/posts/popular')).items;
 }
 
-// Fetch the posts when the component is mounted
 onMounted(fetchPosts);
 </script>
 
 <template>
   <div v-if="posts.length > 0">
-    <main class="flex flex-col m-6 items-center">
+    <main class="flex flex-col m-6 items-center flex-1">
       <Post
         v-for="post in posts"
         :key="post.id"

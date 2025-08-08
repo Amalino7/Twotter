@@ -36,6 +36,11 @@ const router = createRouter({
       name: 'post',
       component: () => import('../views/NewPost.vue'),
     },
+    {
+      path: '/popular',
+      name: 'popular',
+      component: () => import('../views/Popular.vue'),
+    },
   ],
 });
 

@@ -3,6 +3,7 @@
     <router-link key="/home" to="/home" class="">🏠 Home</router-link>
     <router-link key="/new" to="/new" class="">➕ Post</router-link>
     <router-link key="/user" :to="`/user/${username}`" class="">👤 Profile</router-link>
+    <router-link key="/popular" to="/popular" class="">📈 Popular</router-link>
     <!-- <div class="h-4"></div> -->
     <hr class="divide-solid rounded-3xl border-b-4 w-1/3 ml-4 mt-2" />
   </nav>
@@ -10,6 +11,7 @@
     <router-link to="/home" class="flex-1 text-center">🏠 Home</router-link>
     <router-link to="/new" class="flex-1 text-center">➕ Post</router-link>
     <router-link :to="`/user/${username}`" class="flex-1 text-center">👤 Profile</router-link>
+    <router-link to="/popular" class="flex-1 text-center">📈 Popular</router-link>
   </nav>
   <!-- <nav class="bg-green-200 p-l flex justify-around items-center">
     <a class="h-10">Bich</a>
@@ -17,10 +19,10 @@
   </nav> -->
 </template>
 <script lang="ts" setup>
-const username = 'me'
+const username = 'me';
 const props = defineProps({
   isMobile: { Boolean, required: true },
-})
+});
 </script>
 
 <style scoped>
