@@ -3,6 +3,7 @@ package elsys.amalino7.di
 
 import elsys.amalino7.features.comment.CommentRepository
 import elsys.amalino7.features.comment.CommentService
+import elsys.amalino7.features.images.ImageService
 import elsys.amalino7.features.post.PostRepository
 import elsys.amalino7.features.post.PostService
 import elsys.amalino7.features.user.UserRepository
@@ -26,7 +27,7 @@ fun Application.configureFrameworks() {
             single<CommentRepository> { CommentRepositoryImpl() }
             single<CommentService> { CommentService(get()) }
             single<PostRepository> { PostRepositoryImpl() }
-            single<PostService> { PostService(get()) }
+            single<PostService> { PostService(get(), ImageService()) }
         })
     }
     log.info("Koin initialized with: ${getKoin().get<UserService>()}")

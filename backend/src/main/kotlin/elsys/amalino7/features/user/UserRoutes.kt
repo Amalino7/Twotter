@@ -19,16 +19,18 @@ fun Route.userRoutes(
         val users = userService
             .getAll()
             .items
-            .map { it.toResponse() }
+            .map { it.toResponse(null) }
         call.respond(users)
     }
-    get("/users/{id}") {
-        val userId = call.parameters["id"]!!
-        val user = userService.getById(Uuid.parse(userId))
-        if (user == null) {
-            call.respond(HttpStatusCode.NotFound)
-        } else {
-            call.respond(HttpStatusCode.OK, user.toResponse())
+    authenticate("auth-jwt", optional = true) {
+        get("/users/{id}") {
+            val userId = call.parameters["id"]!!
+            val user = userService.getById(Uuid.parse(userId), call.principal<User>()?.id)
+            if (user == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(HttpStatusCode.OK, user)
+            }
         }
     }
     post("/users") {

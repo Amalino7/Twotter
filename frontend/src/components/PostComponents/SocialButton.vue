@@ -2,11 +2,19 @@
 import { ref } from 'vue';
 import LikeIcon from '../icons/LikeIcon.vue';
 
-const isHearted = ref(false);
+const props = defineProps<{
+  hasLiked: boolean;
+}>();
+
+const isHearted = ref(props.hasLiked);
 const isAnimating = ref(false);
 const justUnhearted = ref(false);
 
 const count = defineModel<number>({ required: true });
+
+const emit = defineEmits<{
+  (e: 'liked', liked: boolean): void;
+}>();
 
 function HeartButton() {
   if (isHearted.value) {
@@ -34,7 +42,12 @@ function HeartButton() {
           ? 'text-gray-400'
           : 'text-gray-400 hover:text-pink-400',
     ]"
-    @click="HeartButton"
+    @click="
+      () => {
+        HeartButton();
+        emit('liked', isHearted);
+      }
+    "
   >
     <LikeIcon
       :class="['transition-transform duration-300 ease-out', isAnimating ? 'animate-pop' : '']"

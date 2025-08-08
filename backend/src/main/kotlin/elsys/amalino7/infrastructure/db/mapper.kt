@@ -1,11 +1,7 @@
 package elsys.amalino7.infrastructure.db
 
 import elsys.amalino7.features.comment.Comment
-import elsys.amalino7.features.post.Post
 import elsys.amalino7.features.user.User
-import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.toKotlinInstant
-import org.jetbrains.exposed.v1.core.ExpressionWithColumnTypeAlias
 import org.jetbrains.exposed.v1.core.ResultRow
 import kotlin.uuid.toKotlinUuid
 
@@ -18,7 +14,7 @@ fun ResultRow.toUser(): User {
         bio = this[Users.bio],
         updatedAt = this[Users.updatedAt],
         createdAt = this[Users.createdAt],
-        displayName = this[Users.displayName],
+        displayName = this[Users.displayName] ?: this[Users.username],
         keycloakId = this[Users.keycloakId]
     )
 }
@@ -32,17 +28,17 @@ fun ResultRow.toComment(): Comment {
     )
 }
 
-fun ResultRow.toPost(hasLiked: ExpressionWithColumnTypeAlias<Boolean>): Post {
-    return Post(
-        id = this[Posts.id].value.toKotlinUuid(),
-        content = this[Posts.content],
-        user = this.toUser(),
-        createdAt = this[Posts.createdAt].toJavaInstant().toKotlinInstant(),
-        updatedAt = this[Posts.updatedAt].toJavaInstant().toKotlinInstant(),
-        likeCount = this.getOrNull(PostAggregates.likes) ?: 0,
-        commentCount = this.getOrNull(PostAggregates.comments) ?: 0,
-        imageId = this.getOrNull(Images.id)?.value?.toKotlinUuid(),
-        hasLiked = this.getOrNull(hasLiked) ?: false,
-        imageUrl = null
-    )
-}
+//fun ResultRow.toPost(hasLiked: ExpressionWithColumnTypeAlias<Boolean>): Post {
+//    return Post(
+//        id = this[Posts.id].value.toKotlinUuid(),
+//        content = this[Posts.content],
+//        user = this.toUser(),
+//        createdAt = this[Posts.createdAt].toJavaInstant().toKotlinInstant(),
+//        updatedAt = this[Posts.updatedAt].toJavaInstant().toKotlinInstant(),
+//        likeCount = this.getOrNull(PostAggregates.likes) ?: 0,
+//        commentCount = this.getOrNull(PostAggregates.comments) ?: 0,
+//        imageId = this.getOrNull(Images.id)?.value?.toKotlinUuid(),
+//        hasLiked = this.getOrNull(hasLiked) ?: false,
+//        imageUrl = null
+//    )
+//}

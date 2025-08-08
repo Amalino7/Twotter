@@ -8,4 +8,5 @@ interface PostRepository : CrudRepository<Uuid, Post> {
     suspend fun getPostsOfUserByCriteria(userId: Uuid): List<Post>
     suspend fun likePost(postId: Uuid, userId: Uuid)
     suspend fun unlikePost(postId: Uuid, userId: Uuid)
+    suspend fun getPostsByType(userId: Uuid, type: PostType): List<Post>
 }

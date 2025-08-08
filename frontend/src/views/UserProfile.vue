@@ -5,16 +5,21 @@ import Post from '@/components/PostComponents/Post.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import type { PostResponse } from '@/types/dtos.ts';
 import { useRoute } from 'vue-router';
-import { apiURL } from '@/utils/api.ts';
+import { api } from '@/utils/api.ts';
+import { useUIStore } from '@/stores/ui.ts';
 
 const authStore = useAuthStore();
 const userPosts = ref<PostResponse[]>([]);
+const uiStore = useUIStore();
 
 const route = useRoute();
 const isFollowing = ref(false);
 const isEditing = ref(false);
 const editStatus = ref('');
 const profileUser = ref<User | null>(null);
+
+const followingCount = ref<number | null>();
+const followerCount = ref<number | null>();
 
 const editableDisplayName = ref('');
 const editableUsername = ref('');
@@ -31,9 +36,6 @@ const isOwnProfile = computed(() => {
 onMounted(async () => {
   if (!isOwnProfile.value) {
     await fetchUserProfile(route.params.handle as string);
-    if (profileUser.value) {
-      await fetchUserPosts(profileUser.value.id);
-    }
   } else {
     profileUser.value = authStore.user;
     if (profileUser.value) {
@@ -52,7 +54,7 @@ const startEdit = () => {
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editStatus.value = 'Edit canceled';
+  uiStore.triggerToast('Edit canceled', 'error');
   setTimeout(() => (editStatus.value = ''), 1500);
 };
 
@@ -68,62 +70,29 @@ const saveProfile = async () => {
   authStore.user = updatedUser;
 
   isEditing.value = false;
-  editStatus.value = 'Saved successfully';
-  setTimeout(() => (editStatus.value = ''), 1500);
-
-  // TODO put logic
+  await api.patch(`/users/${profileUser.value.id}`, updatedUser);
+  uiStore.triggerToast('Saved successfully!', 'success');
+  profileUser.value = updatedUser;
 };
 
 const toggleFollow = () => {
+  if (isFollowing.value) {
+    api.delete(`/users/${profileUser.value?.id}/followers`);
+  } else if (!isFollowing.value) {
+    api.post(`/users/${profileUser.value?.id}/followers`, {});
+  }
   isFollowing.value = !isFollowing.value;
 };
 
 async function fetchUserProfile(handle: string) {
-  if (!authStore.accessToken) {
-    console.error('Authentication token not found.');
-    return;
-  }
-
-  try {
-    const response = await fetch(`${apiURL}/users/${handle}`, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user profile with status: ${response.status}`);
-    }
-
-    profileUser.value = await response.json();
-  } catch (error) {
-    console.error('An error occurred while fetching user profile:', error);
-  }
+  // TODO optimise
+  profileUser.value = await api.get(`/users/${handle}`);
+  followingCount.value = (await api.get(`/users/${profileUser.value?.id}/following`)).totalCount;
+  followerCount.value = (await api.get(`/users/${profileUser.value?.id}/followers`)).totalCount;
 }
 
 async function fetchUserPosts(userId: string) {
-  if (!authStore.accessToken) {
-    console.error('Authentication token not found.');
-    return;
-  }
-
-  try {
-    const response = await fetch(`${apiURL}/users/${userId}/posts`, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user posts with status: ${response.status}`);
-    }
-
-    userPosts.value = await response.json();
-  } catch (error) {
-    console.error('An error occurred while fetching user posts:', error);
-  }
+  userPosts.value = await api.get<PostResponse[]>(`/users/${userId}/posts`);
 }
 
 onMounted(async () => {
@@ -194,18 +163,6 @@ onMounted(async () => {
                 Cancel
               </button>
             </div>
-            <p
-              v-if="editStatus"
-              class="mt-2 text-sm flex items-center gap-1"
-              :class="{
-                'text-green-400': editStatus === 'Saved successfully',
-                'text-red-400': editStatus === 'Edit canceled' || editStatus === 'Save failed',
-              }"
-            >
-              <span v-if="editStatus === 'Saved successfully'"> ✅ </span>
-              <span v-else> ❌ </span>
-              {{ editStatus }}
-            </p>
           </template>
           <button
             v-else
@@ -236,8 +193,12 @@ onMounted(async () => {
           </div>
         </transition>
         <div class="flex space-x-4 text-sm text-gray-400">
-          <span><strong class="text-white">123</strong> Following</span>
-          <span><strong class="text-white">456</strong> Followers</span>
+          <span
+            ><strong class="text-white">{{ followingCount }}</strong> Following</span
+          >
+          <span
+            ><strong class="text-white">{{ followerCount }}</strong> Followers</span
+          >
         </div>
       </div>
 
@@ -249,7 +210,9 @@ onMounted(async () => {
         <div v-if="userPosts.length > 0">
           <Post
             v-for="post in userPosts"
+            :userId="profileUser.id"
             :key="post.id"
+            :post-id="post.id"
             :text="post.content"
             :username="post.userDisplayName"
             :user-handle="post.userHandle"
