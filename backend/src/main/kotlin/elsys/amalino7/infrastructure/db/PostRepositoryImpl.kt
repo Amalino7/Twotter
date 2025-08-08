@@ -196,6 +196,20 @@ class PostRepositoryImpl : PostRepository {
         }
     }
 
+    override suspend fun getAllWithRequester(input: PageRequest, requesterId: Uuid): PageResult<Post> {
+        return query {
+            val items = postQuery(userId = requesterId)
+                .orderBy(Posts.createdAt, SortOrder.DESC)
+                .offset(input.size * (input.page - 1))
+                .limit(input.size)
+                .map {
+                    it.toPost(hasLikedAlias(requesterId))
+                }
+                .toList()
+            PageResult(items, null)
+        }
+    }
+
     private fun hasLikedCase(userId: Uuid) = Case()
         .When(Likes.userId eq userId.toJavaUuid(), Op.TRUE)
         .Else(Op.FALSE)

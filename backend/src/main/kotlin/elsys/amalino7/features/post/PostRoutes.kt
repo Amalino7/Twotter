@@ -15,8 +15,8 @@ fun Route.postRoutes(postService: PostService) {
     route("/posts") {
         authenticate("auth-jwt", optional = true) {
             get("/popular") {
-                call.principal<User>()?.id
-                val posts = postService.getPosts(PageRequest(1, 10, Sort("likeCount", Direction.DESC)))
+                val userId = call.principal<User>()?.id
+                val posts = postService.getPosts(PageRequest(1, 10, Sort("likeCount", Direction.DESC)), userId)
                 call.respond(HttpStatusCode.OK, posts)
             }
         }

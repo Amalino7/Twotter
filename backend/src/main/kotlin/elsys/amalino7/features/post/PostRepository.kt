@@ -1,6 +1,8 @@
 package elsys.amalino7.features.post
 
 import elsys.amalino7.utils.CrudRepository
+import elsys.amalino7.utils.PageRequest
+import elsys.amalino7.utils.PageResult
 import kotlin.uuid.Uuid
 
 interface PostRepository : CrudRepository<Uuid, Post> {
@@ -9,4 +11,5 @@ interface PostRepository : CrudRepository<Uuid, Post> {
     suspend fun likePost(postId: Uuid, userId: Uuid)
     suspend fun unlikePost(postId: Uuid, userId: Uuid)
     suspend fun getPostsByType(userId: Uuid, type: PostType): List<Post>
+    suspend fun getAllWithRequester(input: PageRequest, requesterId: Uuid): PageResult<Post>
 }

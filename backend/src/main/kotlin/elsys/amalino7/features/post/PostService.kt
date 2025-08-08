@@ -75,11 +75,14 @@ class PostService(
         )
     }
 
-    suspend fun getPosts(input: PageRequest): PageResult<PostResponse> {
+    suspend fun getPosts(input: PageRequest, requesterId: Uuid? = null): PageResult<PostResponse> {
         if (input.size > 100) {
             throw AppException.ValidationException("You can't request more than 100 posts at once.")
         }
-        val res = postRepository.getAll(input)
+        val res = if (requesterId == null) postRepository.getAll(input) else postRepository.getAllWithRequester(
+            input,
+            requesterId
+        )
         val items = res.items.map { it.toResponse() }
         return PageResult(items, res.totalCount)
     }

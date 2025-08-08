@@ -25,6 +25,7 @@ services:
       - "7080:7080"
     volumes:
       - keycloak-data:/opt/keycloak/data
+      - ./keycloak/themes/quick-theme:/opt/keycloak/themes/quick-theme
   
   db:
     image: postgres:17

@@ -89,6 +89,7 @@ async function fetchUserProfile(handle: string) {
   profileUser.value = await api.get(`/users/${handle}`);
   followingCount.value = (await api.get(`/users/${profileUser.value?.id}/following`)).totalCount;
   followerCount.value = (await api.get(`/users/${profileUser.value?.id}/followers`)).totalCount;
+  isFollowing.value = profileUser?.value['isFollowed'] ?? false;
 }
 
 async function fetchUserPosts(userId: string) {
