@@ -26,11 +26,8 @@ jobs:
       - name: Run Unit Tests
         run: cd frontend && bun run test
 
-      - name: Build Frontend
-        run: cd frontend && bun run build
-
-#      - name: Docker Build Frontend
-#        run: docker build -t twotter-frontend ./frontend
+      - name: Docker Build Frontend
+        run: docker build -t twotter-frontend ./frontend
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
