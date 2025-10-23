@@ -16,8 +16,8 @@ fun Application.connectToDatabase() {
         url = "r2dbc:postgresql://localhost:5433/postgres",
         databaseConfig = {
             connectionFactoryOptions {
-                option(ConnectionFactoryOptions.USER, "postgres")
-                option(ConnectionFactoryOptions.PASSWORD, "postgres")
+                option(ConnectionFactoryOptions.USER, "master")
+                option(ConnectionFactoryOptions.PASSWORD, "noob")
             }
             defaultSchema = Schema(
                 name = "test",
