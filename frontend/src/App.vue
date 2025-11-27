@@ -6,6 +6,7 @@ import ModalWrapper from '@/views/ModalWrapper.vue';
 import { useUIStore } from '@/stores/ui.ts';
 </script>
 
+<!-- Literally pointless-->
 <template>
   <LayoutWrapper></LayoutWrapper>
   <Toaster />
